@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Digest Diario</title>
+    <style>
+      body {
+        font-family: "DejaVu Sans", sans-serif;
+        margin: 24px;
+        color: #111;
+        line-height: 1.5;
+        overflow-wrap: break-word;
+        word-break: normal;
+        hyphens: auto;
+      }
+      h1, h2 {
+        color: #0f2e5a;
+      }
+      .meta {
+        color: #444;
+        margin-bottom: 16px;
+      }
+      .market-board {
+        border: 1px solid #d6deea;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 18px;
+        background: #f8fbff;
+      }
+      .market-title {
+        font-size: 18px;
+        margin: 0 0 8px 0;
+        color: #0f2e5a;
+      }
+      .market-subtitle {
+        font-size: 12px;
+        color: #5b6b82;
+        margin: 0 0 10px 0;
+      }
+      .market-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .market-table th {
+        text-align: left;
+        color: #30425f;
+        font-weight: 700;
+        border-bottom: 1px solid #d6deea;
+        padding: 6px 4px;
+      }
+      .market-table td {
+        border-bottom: 1px solid #e6edf7;
+        padding: 6px 4px;
+      }
+      .market-table tr:last-child td {
+        border-bottom: none;
+      }
+      .up {
+        color: #126a35;
+        font-weight: 700;
+      }
+      .down {
+        color: #b02222;
+        font-weight: 700;
+      }
+      .flat {
+        color: #4d596b;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      li {
+        margin-bottom: 8px;
+        overflow-wrap: break-word;
+        word-break: normal;
+        line-height: 1.45;
+      }
+      .final {
+        margin-top: 20px;
+        white-space: pre-line;
+        overflow-wrap: break-word;
+        word-break: normal;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Newsletter Curator - Digest Diario</h1>
+    <p class="meta">Run: {{ digest.run_id }} | Data: {{ digest.date_ref }}</p>
+
+    {% if digest.market_snapshot %}
+    <section class="market-board">
+      <h2 class="market-title">Radar de Mercado</h2>
+      <p class="market-subtitle">Atualizado automaticamente na geracao deste PDF.</p>
+
+      <table class="market-table" aria-label="Resumo de mercado">
+        <thead>
+          <tr>
+            <th>Indicador</th>
+            <th>Valor</th>
+            <th>Dia</th>
+            <th>Moeda</th>
+            <th>Atualizado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in digest.market_snapshot %}
+          <tr>
+            <td>{{ item.label }}</td>
+            <td>{{ "{:,.2f}".format(item.price).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+            {% if item.change_pct is none %}
+            <td class="flat">-</td>
+            {% elif item.change_pct >= 0 %}
+            <td class="up">+{{ "%.2f"|format(item.change_pct) }}%</td>
+            {% else %}
+            <td class="down">{{ "%.2f"|format(item.change_pct) }}%</td>
+            {% endif %}
+            <td>{{ item.currency }}</td>
+            <td>{{ item.as_of.astimezone().strftime("%d/%m %H:%M") }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    <h2>Temas</h2>
+    <ul>
+      {% for theme in digest.themes %}
+      <li>{{ theme }}</li>
+      {% endfor %}
+    </ul>
+
+    <h2>Texto Final</h2>
+    <div class="final">{{ digest.final_text }}</div>
+  </body>
+</html>

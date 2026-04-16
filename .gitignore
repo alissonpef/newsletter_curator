@@ -1,0 +1,8 @@
+__pycache__/
+.pytest_cache/
+.venv/
+.ollama/
+.tools/
+data/
+models/
+.env

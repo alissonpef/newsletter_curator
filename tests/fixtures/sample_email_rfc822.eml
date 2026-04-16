@@ -1,0 +1,25 @@
+From: newsletter@example.com
+To: reader@example.com
+Subject: Resumo Diario de Tecnologia
+Date: Tue, 14 Apr 2026 08:15:00 +0000
+Message-ID: <sample-001@example.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary42"
+
+--boundary42
+Content-Type: text/plain; charset="utf-8"
+
+Ola,
+
+Hoje tivemos novidades em IA aplicada e infraestrutura local.
+Leia mais em https://example.com/noticia-principal.
+
+Atenciosamente,
+Equipe
+
+--boundary42
+Content-Type: text/html; charset="utf-8"
+
+<html><body><p>Conteudo HTML de fallback.</p></body></html>
+
+--boundary42--

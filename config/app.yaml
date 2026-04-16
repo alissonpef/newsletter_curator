@@ -1,0 +1,44 @@
+imap:
+  mailbox: INBOX
+  search_strategy: SINCE
+  since_hours_back: 24
+
+pipeline:
+  chunk_size: 220
+  chunk_overlap: 40
+  negative_keywords:
+    - unsubscribe
+    - oferta
+    - promocao
+    - desconto
+  topics:
+    - mercado financeiro
+    - macroeconomia
+    - bolsa brasileira
+    - bolsa americana
+    - juros e inflacao
+    - cambio e commodities
+    - criptoativos
+  replay_days_back: 7
+
+vector_store:
+  chunks_collection: newsletter_chunks
+  digests_collection: daily_digests
+  topic_memory_collection: topic_memory
+
+pdf:
+  template_name: newsletter.html.j2
+  output_dir: data/outputs/pdf
+
+tts:
+  output_dir: data/outputs/audio
+
+web:
+  host: 127.0.0.1
+  port: 8787
+  default_days_back: 14
+
+prompts:
+  consolidate_topics: config/prompts/consolidate_topics.md
+  editorial_style: config/prompts/editorial_style.md
+  podcast_script: config/prompts/podcast_script.md

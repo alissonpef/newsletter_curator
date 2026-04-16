@@ -1,0 +1,1 @@
+RawEmail = tuple[str, bytes]
