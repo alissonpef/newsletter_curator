@@ -1,234 +1,143 @@
-# Hermes (Newsletter Curator)
+<!-- PROJECT SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![Unlicense License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-Pipeline local-first para:
-- ler newsletters por IMAP
-- consolidar os temas com LLM local (Ollama)
-- gerar PDF para Kindle
-- gerar podcast curto em audio
-- disponibilizar dashboard web local para consulta e reprocessamento
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/alissonpef/Newsletter-Curator">
+    <img src="newsletter-curator.png" alt="Logo">
+  </a>
 
-## O que o projeto faz
+  <h3 align="center">Hermes Newsletter Curator (v3)</h3>
 
-Entrada:
-- emails da sua mailbox (ex.: Gmail IMAP)
+  <p align="center">
+    Um pipeline minimalista e eficiente para curadoria de newsletters financeiras com IA.
+    <br />
+    <a href="https://github.com/alissonpef/Newsletter-Curator"><strong>Explorar código »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/alissonpef/Newsletter-Curator/issues">Reportar Bug</a>
+    &middot;
+    <a href="https://github.com/alissonpef/Newsletter-Curator/issues">Sugerir Funcionalidade</a>
+  </p>
+</div>
 
-Processamento:
-- limpeza e normalizacao de texto
-- indexacao vetorial (Chroma)
-- curadoria de digest diario com LLM local
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Sumário</summary>
+  <ol>
+    <li>
+      <a href="#📋-sobre-o-projeto">Sobre o Projeto</a>
+      <ul>
+        <li><a href="#funcionalidades-principais">Funcionalidades Principais</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#🚀-como-começar">Como Começar</a>
+      <ul>
+        <li><a href="#pré-requisitos">Pré-requisitos</a></li>
+        <li><a href="#instalação">Instalação</a></li>
+      </ul>
+    </li>
+    <li><a href="#🛠️-uso">Uso</a></li>
+    <li><a href="#🤝-contribuindo">Contribuindo</a></li>
+    <li><a href="#📧-contato">Contato</a></li>
+  </ol>
+</details>
 
-Saidas:
-- PDF em `data/outputs/pdf`
-- audio em `data/outputs/audio`
-- envio do PDF para o seu Kindle por SMTP
+---
 
-## Como o fluxo funciona
+## 📋 Sobre o Projeto
 
-1. Busca emails novos no IMAP
-2. Filtra/normaliza conteudo
-3. Indexa embeddings
-4. Gera digest diario
-5. Renderiza PDF
-6. Envia para Kindle (quando nao e dry-run)
-7. Gera podcast em WAV
+O **Hermes v3** é a versão reconstruída do curador de newsletters focado no "básico bem feito". O sistema atua como um editor humano: lê seus e-mails, sintetiza um único texto contínuo e gera um PDF limpo e um Podcast agradável de ouvir.
 
-## Requisitos
+### Funcionalidades Principais:
+- **Ingestão IMAP:** Monitoramento e extração limpa das newsletters.
+- **Síntese de Passe Único (LLM):** Uso do Ollama para ler as notícias e redigir um "Resumo Executivo" coeso, sem repetições.
+- **PDF Minimalista:** Relatórios simplificados gerados com **Typst** contendo o Radar de Mercado e o resumo.
+- **Podcast TTS:** Conversão do resumo em áudio para audição diária.
+- **Dashboard Web:** Interface limpa para visualizar, baixar e reproduzir as sínteses.
 
-- Linux/macOS (Windows via WSL recomendado)
-- Python 3.11+
-- Conta de email com IMAP/SMTP
-- Ollama instalado e rodando
-- Modelo Piper (`.onnx`) para TTS
+---
 
-## Instalacao do zero
+## 🚀 Como Começar
 
-### 1) Clonar projeto
+### Pré-requisitos
+- **Python 3.10+**
+- **Ollama** (com modelo `qwen2.5:7b` ou equivalente instalado localmente)
+- **Typst** (instalado no sistema para compilação de PDF)
 
-```bash
-git clone https://github.com/alissonpef/Newsletter-Curator.git
-cd Newsletter-Curator
+### Instalação
+
+1. Clone o repositório:
+   ```sh
+   git clone https://github.com/alissonpef/Newsletter-Curator.git
+   ```
+2. Instale as dependências:
+   ```sh
+   pip install -r requirements.txt
+   ```
+3. Configure o arquivo `.env`:
+   ```env
+   IMAP_HOST=imap.gmail.com
+   IMAP_USERNAME=seu_email@gmail.com
+   IMAP_PASSWORD=sua_senha_app
+   OLLAMA_CHAT_MODEL=qwen2.5:7b
+   ```
+
+---
+
+## 🛠️ Uso
+
+*(Consulte o PRD para detalhes da arquitetura em reconstrução)*
+
+### Rodar o Dashboard Web
+```sh
+python -m hermes.main serve-web
 ```
+Acesse em: `http://127.0.0.1:8787`
 
-### 2) Criar ambiente e instalar dependencias
+---
 
-```bash
-python -m venv .venv
-./.venv/bin/pip install -e .[dev]
-```
+## 🤝 Contribuindo
 
-### 3) Preparar variaveis de ambiente
+Contribuições são bem-vindas para manter a versão v3 limpa e direta.
 
-```bash
-cp .env.example .env
-```
+1. Fork o projeto
+2. Crie sua Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-Edite `.env` com seus dados reais.
+---
 
-### 4) Instalar e iniciar Ollama
+## 📧 Contato
 
-Se nao tiver Ollama no sistema, instale pelo site oficial.
-Depois inicie:
+**Alisson Pereira Ferreira**  
+LinkedIn: [https://www.linkedin.com/in/alisson-pereira-ferreira/](https://www.linkedin.com/in/alisson-pereira-ferreira/)  
+E-mail: [alissonpef@gmail.com](mailto:alissonpef@gmail.com)  
 
-```bash
-ollama serve
-```
+Link do Projeto: [https://github.com/alissonpef/Newsletter-Curator](https://github.com/alissonpef/Newsletter-Curator)
 
-Se preferir binario local no projeto, o script de bootstrap tambem aceita `.tools/ollama/bin/ollama`.
+---
 
-### 5) Baixar modelos (LLM + embedding + Piper)
+<p align="right">(<a href="#readme-top">voltar ao topo</a>)</p>
 
-LLM/embedding:
-
-```bash
-ollama pull qwen2.5:1.5b
-ollama pull nomic-embed-text
-```
-
-Modelo de voz Piper (exemplo):
-
-```bash
-mkdir -p models
-curl -L -o models/pt_BR-voice.onnx \
-	https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx
-curl -L -o models/pt_BR-voice.onnx.json \
-	https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx.json
-```
-
-Opcional: bootstrap automatizado de modelos Ollama + validacao do Piper:
-
-```bash
-./scripts/bootstrap_models.sh
-```
-
-### 6) Validar ambiente
-
-```bash
-./.venv/bin/newsletter-curator healthcheck
-```
-
-## Configuracao detalhada
-
-### IMAP/SMTP (exemplo com Gmail)
-
-No Gmail:
-1. Ative 2FA
-2. Gere uma App Password
-3. Ative IMAP nas configuracoes da conta
-
-No `.env`:
-- `IMAP_HOST=imap.gmail.com`
-- `IMAP_PORT=993`
-- `IMAP_USERNAME=seu_email`
-- `IMAP_PASSWORD=app_password`
-- `SMTP_HOST=smtp.gmail.com`
-- `SMTP_PORT=465`
-- `SMTP_USERNAME=seu_email`
-- `SMTP_PASSWORD=app_password`
-
-### Kindle (obrigatorio para entrega)
-
-1. Pegue o endereco do seu Kindle (algo como `seunome_xxxxx@kindle.com`)
-2. Configure `KINDLE_ADDRESS` no `.env`
-3. Na Amazon, adicione o email remetente (`SMTP_USERNAME`) na lista de remetentes aprovados:
-	 - Manage Your Content and Devices
-	 - Preferences
-	 - Personal Document Settings
-	 - Approved Personal Document E-mail List
-
-Sem este passo, a Amazon pode rejeitar o envio.
-
-### Remetentes permitidos de newsletters
-
-Use `NEWSLETTER_ALLOWED_SENDERS` no `.env`, separado por virgula.
-
-Exemplo:
-
-```dotenv
-NEWSLETTER_ALLOWED_SENDERS=newsletter@fonte1.com,contato@fonte2.com
-```
-
-### Ajustes de pipeline
-
-O arquivo `config/app.yaml` define:
-- estrategia de busca IMAP (`SINCE`, janela em horas)
-- topicos de curadoria
-- diretorios de saida
-- host/porta do dashboard
-
-## Execucao
-
-### Dry-run (sem envio para Kindle)
-
-```bash
-./.venv/bin/newsletter-curator run-daily --dry-run
-```
-
-### Execucao completa
-
-```bash
-./.venv/bin/newsletter-curator run-daily
-```
-
-### Reenviar ultimo PDF para Kindle
-
-```bash
-./.venv/bin/newsletter-curator send-latest-kindle
-```
-
-### Dashboard web local
-
-```bash
-./.venv/bin/newsletter-curator serve-web
-```
-
-Acesse: `http://127.0.0.1:8787`
-
-### Replay de dias perdidos
-
-```bash
-./.venv/bin/newsletter-curator replay-missed --days-back 7
-```
-
-### Exportar checkpoints para JSON (sob demanda)
-
-```bash
-./.venv/bin/newsletter-curator export-checkpoints
-```
-
-## Testes
-
-Executar todos os testes:
-
-```bash
-./.venv/bin/python -m pytest -q
-```
-
-## Estrutura de saida
-
-- `data/outputs/pdf/*.pdf`
-- `data/outputs/audio/*.wav`
-- `data/state/processed_ids.sqlite`
-
-## Troubleshooting rapido
-
-- `ollama endpoint unavailable`:
-	- verifique `ollama serve`
-- falha no Kindle:
-	- confirme `KINDLE_ADDRESS`
-	- confirme email aprovado na Amazon
-- falha IMAP:
-	- valide App Password
-	- valide IMAP habilitado na conta
-- falha TTS:
-	- confira `PIPER_MODEL_PATH`
-	- confira existencia de `models/pt_BR-voice.onnx`
-
-## Seguranca
-
-Nao versione:
-- `.env`
-- `.venv/`
-- `.ollama/`
-- `.tools/`
-- `data/`
-- modelos locais grandes em `models/`
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/alissonpef/Newsletter-Curator.svg?style=for-the-badge
+[contributors-url]: https://github.com/alissonpef/Newsletter-Curator/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/alissonpef/Newsletter-Curator.svg?style=for-the-badge
+[forks-url]: https://github.com/alissonpef/Newsletter-Curator/network/members
+[stars-shield]: https://img.shields.io/github/stars/alissonpef/Newsletter-Curator.svg?style=for-the-badge
+[stars-url]: https://github.com/alissonpef/Newsletter-Curator/stargazers
+[issues-shield]: https://img.shields.io/github/issues/alissonpef/Newsletter-Curator.svg?style=for-the-badge
+[issues-url]: https://github.com/alissonpef/Newsletter-Curator/issues
+[license-shield]: https://img.shields.io/github/license/alissonpef/Newsletter-Curator.svg?style=for-the-badge
+[license-url]: https://github.com/alissonpef/Newsletter-Curator/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/alisson-pereira-ferreira/
