@@ -1,63 +1,63 @@
-from dataclasses import dataclass, field
-from datetime import datetime, date
-from pathlib import Path
-from typing import Literal
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
 
 
-@dataclass(slots=True, frozen=True)
-class EmailItem:
-    id: str
-    message_id: str
-    uid: str
-    sender: str
-    subject: str
-    received_at: datetime
-    body_text: str
-    links: list[str]
-
-
-@dataclass(slots=True, frozen=True)
-class ChunkItem:
-    id: str
-    email_id: str
-    chunk_index: int
-    chunk_text: str
-    tokens_est: int
-
-
-@dataclass(slots=True, frozen=True)
-class MarketSnapshotItem:
-    label: str
-    symbol: str
-    price: float
-    change_pct: float | None
-    currency: str
-    as_of: datetime
-
-
-@dataclass(slots=True, frozen=True)
-class DailyDigest:
-    run_id: str
-    date_ref: date
-    themes: list[str]
-    highlights: list[str]
-    sources: list[str]
-    final_text: str
-    market_snapshot: list[MarketSnapshotItem] = field(default_factory=list)
-
-
-@dataclass(slots=True, frozen=True)
-class MediaArtifact:
-    run_id: str
-    type: Literal["pdf", "audio"]
-    path: Path
-    checksum: str
-
-
-@dataclass(slots=True, frozen=True)
-class RunState:
-    run_id: str
+class RunHistory(BaseModel):
     status: str
-    started_at: datetime
-    finished_at: datetime | None
-    checkpoint: str
+    statusLabel: str
+    checkpointLabel: str
+    startedAtLabel: Optional[str] = None
+
+
+class Artifact(BaseModel):
+    url: str
+    sizeLabel: str
+
+
+class Topic(BaseModel):
+    title: str
+    summary: str
+    impact: str
+    signal: str = "Médio"
+
+
+class SummaryData(BaseModel):
+    thesis: str = ""
+    executiveSummary: str = ""
+    keyPoints: List[str] = Field(default_factory=list)
+    topics: List[Topic] = Field(default_factory=list)
+    closing: str = ""
+    rawMarkdown: Optional[str] = None
+    plainText: str = ""
+    ttsScript: str = ""
+    sourceCount: int = 0
+    paragraphCount: int = 0
+
+
+class JobStatus(BaseModel):
+    dateRef: str
+    status: str
+    statusLabel: str
+    message: Optional[str] = None
+    error: Optional[str] = None
+    progressPct: int = 0
+    currentStepKey: Optional[str] = None
+    currentStepLabel: Optional[str] = None
+    warnings: List[str] = Field(default_factory=list)
+
+
+class DailyDigest(BaseModel):
+    dateRef: str
+    dateLabel: str
+    status: str
+    statusLabel: str
+    hasContent: bool = False
+    summary: Optional[str] = None
+    summaryData: Optional[SummaryData] = None
+    pdfCount: int = 0
+    audioCount: int = 0
+    pdfArtifacts: List[Artifact] = Field(default_factory=list)
+    audioArtifacts: List[Artifact] = Field(default_factory=list)
+    runHistory: List[RunHistory] = Field(default_factory=list)
+    warnings: List[str] = Field(default_factory=list)
