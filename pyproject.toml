@@ -3,30 +3,29 @@ requires = ["hatchling>=1.25.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "newsletter-curator"
-version = "0.1.0"
-description = "Local-first newsletter curation pipeline with RAG"
+name = "hermes-newsletter-curator"
+version = "0.3.0"
+description = "Dashboard editorial para consolidar newsletters financeiras em PDF, áudio e Kindle"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "chromadb>=0.5.5",
-  "jinja2>=3.1.4",
-  "piper-tts>=1.4.2",
-  "pydantic>=2.8.2",
-  "pydantic-settings>=2.4.0",
-  "pyyaml>=6.0.2",
-  "tenacity>=8.5.0",
-  "typer>=0.12.3",
-  "weasyprint>=62.3",
+  "beautifulsoup4>=4.12.3",
+  "edge-tts>=7.0.0",
+  "fastapi>=0.116.0",
+  "fpdf2>=2.8.2",
+  "jinja2>=3.1.6",
+  "pydantic>=2.11.0",
+  "python-dotenv>=1.1.0",
+  "requests>=2.33.0",
+  "uvicorn>=0.35.0",
+  "yfinance>=0.2.65",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.3.2",
+  "pypdf>=5.5.0",
+  "pytest>=8.3.5",
 ]
-
-[project.scripts]
-newsletter-curator = "hermes.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/hermes"]
