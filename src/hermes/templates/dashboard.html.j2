@@ -3,105 +3,114 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Hermes · Dashboard editorial para newsletters financeiras">
     <title>{{ page_title }}</title>
     <link rel="stylesheet" href="/static/dashboard.css">
   </head>
   <body>
     <div class="page-shell">
-      <header class="hero panel">
-        <div class="hero-copy">
-          <span class="eyebrow">Hermes Studio</span>
-          <h1>PDFs e podcasts organizados por data, com geracao sob demanda.</h1>
-          <p>
-            Consulte os ultimos dias, veja se o conteudo ja existe, gere novamente quando quiser
-            e acesse PDF e audio em um fluxo unico e facil de operar.
-          </p>
-          <div class="hero-actions">
-            <label class="date-control" for="date-picker">
-              <span>Data de referencia</span>
-              <input id="date-picker" type="date">
-            </label>
-            <button id="inspect-button" class="button button-secondary" type="button">Analisar data</button>
-            <button id="generate-button" class="button button-primary" type="button">Gerar PDF + podcast</button>
-            <button id="force-button" class="button button-ghost" type="button">Gerar novamente</button>
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark">H</div>
+          <div>
+            <p class="eyebrow">Briefing Executivo</p>
+            <h1>Hermes</h1>
           </div>
-          <div id="job-banner" class="job-banner" hidden></div>
         </div>
-        <div class="hero-side">
-          <div class="hero-card">
-            <span class="hero-card-label">Janela atual</span>
-            <strong id="window-value">-</strong>
-            <small id="generated-at">-</small>
+        <div class="topbar-meta">
+          <div>
+            <span class="meta-label">Atualização</span>
+            <strong id="generated-at">-</strong>
           </div>
-          <div class="hero-card alt">
-            <span class="hero-card-label">Acesso rapido</span>
-            <strong>Biblioteca operacional</strong>
-            <small>Historico, checkpoints, downloads e player em um so lugar.</small>
+          <div class="status-live">
+            <span class="status-live-dot"></span>
+            <span>Dashboard online</span>
           </div>
         </div>
       </header>
 
-      <section class="filters panel">
-        <div>
-          <span class="section-kicker">Recortes</span>
-          <h2>Escolha a janela de consulta</h2>
+      <aside class="calendar-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Cobertura</p>
+            <h2>Últimas semanas</h2>
+          </div>
+          <div id="calendar-stats" class="mini-stats"></div>
         </div>
-        <div id="days-filter" class="filter-group"></div>
-      </section>
+        <div id="calendar-weeks" class="calendar-weeks"></div>
+      </aside>
 
-      <main class="dashboard-grid">
-        <section class="panel main-panel">
-          <div class="panel-head">
-            <div>
-              <span class="section-kicker">Visao geral</span>
-              <h2>Radar de disponibilidade</h2>
-            </div>
-            <p>Cards com status por dia, para voce ver rapidamente o que ja esta pronto.</p>
-          </div>
-          <div id="stats-grid" class="stats-grid"></div>
-          <div id="days-grid" class="days-grid"></div>
-        </section>
-
-        <aside class="panel detail-panel">
-          <div class="panel-head compact">
-            <div>
-              <span class="section-kicker">Detalhe da data</span>
-              <h2 id="detail-title">Selecione um dia</h2>
-            </div>
-            <span id="detail-status" class="status-pill">-</span>
-          </div>
-          <p id="detail-summary" class="detail-summary">Escolha uma data para ver PDFs, podcasts e historico da execucao.</p>
-          <div id="artifact-section" class="artifact-section"></div>
-          <div id="player-section" class="player-section"></div>
-          <div id="history-section" class="history-section"></div>
-        </aside>
+      <main class="content-panel">
+        <section id="hero-strip" class="hero-strip"></section>
+        <section id="digest-content" class="digest-grid"></section>
       </main>
 
-      <section class="panel extra-panel">
-        <div class="panel-head compact">
-          <div>
-            <span class="section-kicker">Como usar</span>
-            <h2>Fluxo pensado para operacao diaria</h2>
+      <aside class="action-panel">
+        <section class="card action-card">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Execução</p>
+              <h2>Gerar edição</h2>
+            </div>
           </div>
-        </div>
-        <div class="tips-grid">
-          <article>
-            <h3>1. Verifique a data</h3>
-            <p>Escolha qualquer dia recente para saber se o PDF e o podcast ja existem ou se ainda precisam ser gerados.</p>
-          </article>
-          <article>
-            <h3>2. Gere so quando precisar</h3>
-            <p>Se ambos os artefatos ja estiverem prontos, a interface te avisa e evita retrabalho desnecessario.</p>
-          </article>
-          <article>
-            <h3>3. Baixe ou escute na hora</h3>
-            <p>O detalhe do dia reune links diretos para download do PDF e player embutido para o audio.</p>
-          </article>
-        </div>
-      </section>
+          <label class="field-label" for="date-picker">Data da edição</label>
+          <input id="date-picker" class="date-input" type="date">
+          <div class="button-row">
+            <button id="generate-button" class="btn btn-primary" type="button">Gerar</button>
+            <button id="force-button" class="btn btn-secondary" type="button">Regenerar</button>
+          </div>
+          <div id="job-banner" class="job-banner"></div>
+          <div id="job-progress" class="progress-wrap"></div>
+        </section>
+
+        <section class="card">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Entrega</p>
+              <h2>Kindle</h2>
+            </div>
+          </div>
+          <label class="field-label" for="kindle-email">E-mail do Kindle</label>
+          <input id="kindle-email" class="text-input" type="email" placeholder="seu-dispositivo@kindle.com">
+          <p id="kindle-hint" class="helper-text"></p>
+          <button id="kindle-button" class="btn btn-ghost" type="button">Enviar PDF para Kindle</button>
+        </section>
+
+        <section class="card">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Mercado</p>
+              <h2>Radar</h2>
+            </div>
+          </div>
+          <div id="market-radar" class="market-stack"></div>
+        </section>
+
+        <section id="player-panel" class="card" hidden>
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Áudio</p>
+              <h2>Podcast</h2>
+            </div>
+          </div>
+          <audio id="audio-player" controls preload="metadata"></audio>
+        </section>
+
+        <section id="downloads-panel" class="card" hidden>
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Arquivos</p>
+              <h2>Downloads</h2>
+            </div>
+          </div>
+          <div id="download-links" class="download-stack"></div>
+        </section>
+      </aside>
     </div>
 
-    <div id="initial-state" data-payload-b64="{{ state_payload_b64 }}" hidden></div>
+    <script>
+      window.__HERMES_STATE__ = {{ state_payload | tojson }};
+    </script>
     <script src="/static/dashboard.js" defer></script>
   </body>
 </html>
