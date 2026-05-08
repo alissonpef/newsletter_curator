@@ -12,6 +12,7 @@ from hermes.core.interfaces import (
     MarketDataPort,
     PdfPort,
     StateRepositoryPort,
+    VectorStorePort,
 )
 
 
@@ -24,6 +25,7 @@ class ProcessDailyUseCase:
         audio_port: AudioPort,
         state_repo: StateRepositoryPort,
         market_data_port: MarketDataPort,
+        vector_store: VectorStorePort | None = None,
     ):
         self.email_port = email_port
         self.llm_port = llm_port
@@ -31,6 +33,7 @@ class ProcessDailyUseCase:
         self.audio_port = audio_port
         self.state_repo = state_repo
         self.market_data_port = market_data_port
+        self.vector_store: VectorStorePort | None = vector_store
 
     def _new_digest(self, date_ref: str) -> Dict:
         return {
@@ -38,7 +41,6 @@ class ProcessDailyUseCase:
             "dateLabel": date_ref,
             "status": "idle",
             "statusLabel": "Aguardando",
-            "runHistory": [],
             "pdfArtifacts": [],
             "audioArtifacts": [],
             "warnings": [],
@@ -46,22 +48,6 @@ class ProcessDailyUseCase:
             "pdfCount": 0,
             "audioCount": 0,
         }
-
-    def _record_history(
-        self, digest: Dict, label: str, status: str, status_label: str
-    ) -> None:
-        digest.setdefault("runHistory", []).insert(
-            0,
-            {
-                "status": status,
-                "statusLabel": status_label,
-                "checkpointLabel": label,
-                "startedAtLabel": datetime.now().strftime("%H:%M:%S"),
-            },
-        )
-        digest["runHistory"] = digest["runHistory"][:18]
-        digest["status"] = status
-        digest["statusLabel"] = status_label
 
     def _save_job(
         self,
@@ -109,6 +95,7 @@ class ProcessDailyUseCase:
         digest["status"] = "running"
         digest["statusLabel"] = "Processando"
         self.state_repo.save_digest(date_ref, digest)
+        print(f"[{date_ref}] Iniciando processamento diário...")
 
         self._save_job(
             date_ref,
@@ -121,9 +108,6 @@ class ProcessDailyUseCase:
         )
 
         try:
-            self._record_history(
-                digest, "Buscando newsletters do dia", "running", "Executando"
-            )
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,
@@ -134,9 +118,11 @@ class ProcessDailyUseCase:
                 current_step_key="ingest",
                 current_step_label="Buscando newsletters",
             )
+            print(f"[{date_ref}] Buscando newsletters no e-mail...")
 
             emails = await self._run_blocking(self.email_port.fetch_emails, date_ref)
             if not emails:
+                print(f"[{date_ref}] Nenhuma newsletter encontrada para esta data.")
                 warning = "Nenhuma newsletter elegível foi encontrada para esta data."
                 digest["hasContent"] = False
                 digest["summary"] = ""
@@ -146,12 +132,6 @@ class ProcessDailyUseCase:
                 digest["pdfCount"] = 0
                 digest["audioCount"] = 0
                 digest["warnings"] = [warning]
-                self._record_history(
-                    digest,
-                    "Sem conteúdo disponível para a data",
-                    "missing",
-                    "Sem Conteúdo",
-                )
                 self.state_repo.save_digest(date_ref, digest)
                 self._save_job(
                     date_ref,
@@ -166,9 +146,11 @@ class ProcessDailyUseCase:
                 return
 
             digest["sourceCount"] = len(emails)
-            self._record_history(
-                digest, "Consolidando a síntese com IA", "running", "Executando"
-            )
+            print(f"[{date_ref}] Encontradas {len(emails)} newsletters:")
+            for email in emails:
+                subject = email.get("subject", "Sem assunto")
+                print(f"  - {subject}")
+
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,
@@ -179,6 +161,9 @@ class ProcessDailyUseCase:
                 current_step_key="synthesis",
                 current_step_label="Consolidando a síntese",
             )
+            print(
+                f"[{date_ref}] Consolidando síntese com Ollama (isso pode demorar)..."
+            )
 
             summary_data = await self._run_blocking(
                 self.llm_port.generate_summary, emails
@@ -187,9 +172,6 @@ class ProcessDailyUseCase:
             digest["summary"] = summary_data.get("plainText", "")
             digest["hasContent"] = bool(digest["summary"])
 
-            self._record_history(
-                digest, "Atualizando o radar de mercado", "running", "Executando"
-            )
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,
@@ -200,15 +182,13 @@ class ProcessDailyUseCase:
                 current_step_key="market",
                 current_step_label="Atualizando o radar de mercado",
             )
+            print(f"[{date_ref}] Coletando dados de mercado...")
 
             market_data = await self._run_blocking(
                 self.market_data_port.fetch_market_data, date_ref
             )
             digest["marketData"] = market_data
 
-            self._record_history(
-                digest, "Renderizando o PDF editorial", "running", "Executando"
-            )
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,
@@ -219,6 +199,7 @@ class ProcessDailyUseCase:
                 current_step_key="pdf",
                 current_step_label="Renderizando o PDF",
             )
+            print(f"[{date_ref}] Renderizando PDF editorial...")
 
             pdf_path = await self._run_blocking(
                 self.pdf_port.render_pdf, date_ref, digest, market_data
@@ -233,9 +214,6 @@ class ProcessDailyUseCase:
                 ]
                 digest["pdfCount"] = 1
 
-            self._record_history(
-                digest, "Gerando a versão em áudio", "running", "Executando"
-            )
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,
@@ -246,6 +224,7 @@ class ProcessDailyUseCase:
                 current_step_key="audio",
                 current_step_label="Gerando o áudio",
             )
+            print(f"[{date_ref}] Gerando narração em áudio...")
 
             audio_text = summary_data.get("ttsScript") or digest.get("summary") or ""
             audio_path = await self.audio_port.generate_audio(date_ref, audio_text)
@@ -260,9 +239,6 @@ class ProcessDailyUseCase:
                 digest["audioCount"] = 1
 
             digest["processedAtLabel"] = datetime.now().strftime("%d/%m/%Y %H:%M")
-            self._record_history(
-                digest, "Digest finalizado com sucesso", "ready", "Pronto"
-            )
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,
@@ -273,13 +249,29 @@ class ProcessDailyUseCase:
                 current_step_key="done",
                 current_step_label="Digest pronto",
             )
+            print(f"[{date_ref}] Digest finalizado com sucesso!")
+
+            if self.vector_store:
+                try:
+                    print(f"[{date_ref}] Indexando conteúdo no banco vetorial...")
+                    for email in emails:
+                        self.vector_store.index_newsletter(
+                            date_ref=date_ref,
+                            sender=email.get("sender", ""),
+                            subject=email.get("subject", ""),
+                            content=email.get("content", ""),
+                        )
+                    self.vector_store.index_digest(date_ref, summary_data)
+                    print(f"[{date_ref}] Indexação vetorial concluída.")
+                except Exception as vec_exc:
+                    warn = f"Aviso: falha na indexação vetorial: {vec_exc}"
+                    digest.setdefault("warnings", []).append(warn)
+                    self.state_repo.save_digest(date_ref, digest)
+                    print(f"[{date_ref}] AVISO: {warn}")
         except Exception as exc:
             error_message = str(exc)
             digest.setdefault("warnings", []).append(
                 "A última tentativa terminou com erro."
-            )
-            self._record_history(
-                digest, f"Falha na execução: {error_message}", "failed", "Erro"
             )
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
@@ -293,4 +285,5 @@ class ProcessDailyUseCase:
                 warnings=digest.get("warnings", []),
                 error=error_message,
             )
+            print(f"[{date_ref}] ERRO CRÍTICO: {error_message}")
             raise
