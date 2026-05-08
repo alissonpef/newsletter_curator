@@ -31,7 +31,6 @@ def normalize_spaces(text: str) -> str:
     text = text or ""
     text = re.sub(r"[\u200b\u200c\u200d\ufeff\u2028\u2029]", "", text)
 
-    # Fix hyphenated word breaks: "inter- \n nacional" -> "internacional"
     text = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", text)
 
     text = text.replace("\r", "")
@@ -310,125 +309,6 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
         seen_topics.add(topic_key)
         unique_topics.append(topic)
     summary_data["topics"] = unique_topics
-    summary_data["plainText"] = summary_to_plain_text(summary_data)
-    summary_data["ttsScript"] = summary_data["plainText"]
-    summary_data["paragraphCount"] = len(
-        [
-            part
-            for part in re.split(r"\n\n+", summary_data["plainText"])
-            if normalize_spaces(part)
-        ]
-    )
-    return summary_data
-
-
-def build_fallback_summary(source_packets: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
-    packets = [packet for packet in source_packets if packet]
-    summary_data = empty_summary()
-    summary_data["sourceCount"] = len(packets)
-
-    if not packets:
-        return summary_data
-
-    lead_titles = [
-        normalize_heading(packet.get("title", ""))
-        for packet in packets[:10]
-        if packet.get("title")
-    ]
-    lead_highlights = [
-        normalize_spaces(paragraph)
-        for packet in packets
-        for paragraph in packet.get("highlights", [])[:2]
-        if normalize_spaces(paragraph)
-    ]
-
-    summary_data["thesis"] = (
-        lead_highlights[0]
-        if lead_highlights
-        else (lead_titles[0] if lead_titles else "")
-    )
-    executive_summary_parts: List[str] = []
-    for packet in packets[1:4]:
-        packet_highlights = [
-            normalize_spaces(paragraph)
-            for paragraph in packet.get("highlights", [])
-            if normalize_spaces(paragraph)
-        ]
-        if packet_highlights:
-            executive_summary_parts.append(packet_highlights[0])
-        elif packet.get("title"):
-            executive_summary_parts.append(normalize_heading(packet["title"]))
-
-    if not executive_summary_parts:
-        executive_summary_parts = lead_highlights[1:4] or lead_titles[1:4]
-
-    summary_data["executiveSummary"] = " ".join(executive_summary_parts).strip()
-    summary_data["keyPoints"] = _dedupe_text_items(
-        lead_highlights[:5] or lead_titles[:5]
-    )
-
-    topics: List[Dict[str, Any]] = []
-
-    for packet in packets[:20]:
-        title = normalize_heading(packet.get("title", "")) or "Radar"
-        highlights = packet.get("highlights", [])
-        if not highlights:
-            continue
-
-        # Better summary extraction: join paragraphs but check for hyphenated word breaks
-        summary_raw = packet.get("summary") or " ".join(highlights[:2]).strip()
-        summary = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", summary_raw) # Join broken words
-        summary = re.sub(r"\s+", " ", summary).strip()
-
-        # Better impact extraction: avoid repeating the title
-        impact_raw = packet.get("impact") or (
-            highlights[2]
-            if len(highlights) > 2
-            else ""
-        )
-        impact = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", impact_raw)
-        impact = re.sub(r"\s+", " ", impact).strip().lstrip(" ,;:-.")
-
-        # If impact is too short or just repeats the title, use a generic one or none
-        if not impact or len(impact) < 10 or impact.lower() in title.lower():
-            impact = "Ponto de atenção para investidores."
-
-        from difflib import SequenceMatcher
-
-        is_duplicate = False
-        for et in topics:
-            if SequenceMatcher(None, title.lower(), et["title"].lower()).ratio() > 0.8:
-                is_duplicate = True
-                break
-            if (
-                SequenceMatcher(
-                    None, summary[:100].lower(), et["summary"][:100].lower()
-                ).ratio()
-                > 0.7
-            ):
-                is_duplicate = True
-                break
-
-        if is_duplicate:
-            continue
-
-        topics.append(
-            {
-                "title": title,
-                "summary": summary[:350],
-                "impact": impact,
-                "signal": "Média",
-            }
-        )
-
-        if len(topics) >= 12:
-            break
-
-    summary_data["topics"] = topics
-    summary_data["closing"] = (
-        "O acompanhamento do dia pede atenção à evolução desses temas e à reação dos mercados locais e globais."
-    )
-
     summary_data["plainText"] = summary_to_plain_text(summary_data)
     summary_data["ttsScript"] = summary_data["plainText"]
     summary_data["paragraphCount"] = len(
