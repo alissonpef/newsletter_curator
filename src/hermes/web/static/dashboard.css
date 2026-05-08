@@ -872,7 +872,6 @@ audio {
   }
 }
 
-/* Quick search card (sidebar) */
 .quick-search-wrap {
   display: flex;
   gap: 8px;
@@ -891,7 +890,6 @@ audio {
   flex-shrink: 0;
 }
 
-/* Brand mark as anchor (search page back link) */
 a.brand-mark {
   text-decoration: none;
   display: grid;
