@@ -12,8 +12,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from hermes.infra.adapters.state_repository import SqliteStateRepository
+from hermes.core.interfaces import StateRepositoryPort
 from hermes.use_cases.process_daily import ProcessDailyUseCase
+from hermes.use_cases.search_knowledge import SearchKnowledgeUseCase
 from hermes.use_cases.send_to_kindle import SendToKindleUseCase
 
 
@@ -58,9 +59,10 @@ PT_MONTHS = [
 
 @dataclass
 class ServerConfig:
-    state_repo: SqliteStateRepository | None = None
+    state_repo: StateRepositoryPort | None = None
     process_daily_uc: ProcessDailyUseCase | None = None
     send_to_kindle_uc: SendToKindleUseCase | None = None
+    search_uc: SearchKnowledgeUseCase | None = None
     days_back: int = 28
     default_kindle_email: str = ""
     kindle_enabled: bool = False
@@ -288,3 +290,57 @@ async def api_send_kindle(req: KindleRequest):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return result
+
+
+@app.get("/api/search")
+async def api_search(
+    q: str,
+    n: int = 20,
+    date_from: str | None = None,
+    date_to: str | None = None,
+):
+    if ServerConfig.search_uc is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Busca vetorial não configurada. Verifique o ChromaDB e o modelo de embeddings.",
+        )
+    return ServerConfig.search_uc.execute(
+        query=q,
+        n_results=max(1, min(n, 50)),
+        date_from=date_from,
+        date_to=date_to,
+    )
+
+
+@app.get("/api/search/timeline")
+async def api_search_timeline(q: str, days: int = 30):
+    if ServerConfig.search_uc is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Busca vetorial não configurada.",
+        )
+    return ServerConfig.search_uc.get_topic_timeline(
+        topic=q,
+        days=max(1, min(days, 365)),
+    )
+
+
+@app.get("/api/vector-stats")
+async def api_vector_stats():
+    if ServerConfig.search_uc is None:
+        return {"available": False}
+    stats = ServerConfig.search_uc.get_vector_stats()
+    return {"available": True, **stats}
+
+
+@app.get("/search", response_class=HTMLResponse)
+async def search_page(request: Request):
+    templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+    return templates.TemplateResponse(
+        request=request,
+        name="search.html.j2",
+        context={
+            "page_title": "Hermes · Busca",
+            "search_enabled": ServerConfig.search_uc is not None,
+        },
+    )
