@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Hermes · Busca semântica no histórico de newsletters e digests financeiros">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="/static/dashboard.css?v=8.0">
+    <link rel="stylesheet" href="/static/search.css?v=8.0">
+  </head>
+  <body>
+    <div class="page-shell search-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <a href="/" class="brand-mark" title="Voltar ao dashboard">H</a>
+          <div>
+            <p class="eyebrow">Memória</p>
+            <h1>Busca Vetorial</h1>
+          </div>
+        </div>
+        <div class="topbar-meta">
+          <a href="/" class="btn btn-ghost btn-sm">← Dashboard</a>
+          {% if not search_enabled %}
+          <span class="status-badge failed">Busca indisponível</span>
+          {% else %}
+          <div class="status-live">
+            <span class="status-live-dot"></span>
+            <span>ChromaDB ativo</span>
+          </div>
+          {% endif %}
+        </div>
+      </header>
+
+      <main class="search-main">
+
+        <!-- Search bar -->
+        <section class="search-hero">
+          <div class="search-hero-inner">
+            <p class="eyebrow">Pesquisar no histórico</p>
+            <h2>O que você quer encontrar?</h2>
+            <p class="search-hint">Busca semântica em todas as newsletters e digests indexados</p>
+
+            <div class="search-bar-wrap">
+              <input
+                id="search-input"
+                class="search-bar"
+                type="search"
+                placeholder="Ex: Petrobras, Selic, Fed, Bitcoin, IPCA…"
+                autocomplete="off"
+                autofocus
+                {% if not search_enabled %}disabled{% endif %}
+              >
+              <button id="search-btn" class="btn btn-primary" type="button" {% if not search_enabled %}disabled{% endif %}>
+                Buscar
+              </button>
+            </div>
+
+            <div class="search-filters" id="search-filters">
+              <label class="filter-label">
+                De:
+                <input type="date" id="filter-from" class="date-input-sm">
+              </label>
+              <label class="filter-label">
+                Até:
+                <input type="date" id="filter-to" class="date-input-sm">
+              </label>
+              <label class="filter-label">
+                Resultados:
+                <select id="filter-n" class="select-sm">
+                  <option value="10">10</option>
+                  <option value="20" selected>20</option>
+                  <option value="30">30</option>
+                  <option value="50">50</option>
+                </select>
+              </label>
+              <div class="filter-tabs">
+                <button class="tab-btn active" data-tab="results" type="button">Resultados</button>
+                <button class="tab-btn" data-tab="timeline" type="button">Timeline</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Results panel -->
+        <section class="results-panel" id="results-panel">
+          <div id="results-meta" class="results-meta" hidden></div>
+          <div id="results-grid" class="results-grid"></div>
+          <div id="results-empty" class="results-empty" hidden>
+            <p class="eyebrow">Sem resultados</p>
+            <h3>Nenhuma correspondência encontrada</h3>
+            <p>Tente termos diferentes ou amplie o período de busca.</p>
+          </div>
+          <div id="results-loading" class="results-loading" hidden>
+            <div class="spinner"></div>
+            <p>Buscando no banco vetorial…</p>
+          </div>
+          <div id="search-unavailable" class="results-empty" {% if search_enabled %}hidden{% endif %}>
+            <p class="eyebrow">Indisponível</p>
+            <h3>Busca vetorial não configurada</h3>
+            <p>Verifique se o ChromaDB está ativo e se o modelo <code>nomic-embed-text</code> está instalado no Ollama.</p>
+            <pre class="code-hint">ollama pull nomic-embed-text</pre>
+          </div>
+        </section>
+
+        <!-- Timeline panel (hidden until tab switch) -->
+        <section class="timeline-panel" id="timeline-panel" hidden>
+          <div id="timeline-meta" class="results-meta" hidden></div>
+          <div id="timeline-chart" class="timeline-chart"></div>
+          <div id="timeline-list" class="timeline-list"></div>
+          <div id="timeline-empty" class="results-empty" hidden>
+            <p class="eyebrow">Sem dados</p>
+            <h3>Nenhuma ocorrência encontrada</h3>
+            <p>Este tema não aparece nos digests do período selecionado.</p>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <script src="/static/search.js" defer></script>
+  </body>
+</html>

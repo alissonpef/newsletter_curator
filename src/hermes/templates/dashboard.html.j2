@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Hermes · Dashboard editorial para newsletters financeiras">
     <title>{{ page_title }}</title>
-    <link rel="stylesheet" href="/static/dashboard.css">
+    <link rel="stylesheet" href="/static/dashboard.css?v=8.0">
+    <link rel="stylesheet" href="/static/search.css?v=8.0">
   </head>
   <body>
     <div class="page-shell">
@@ -43,6 +44,28 @@
       <main class="content-panel">
         <section id="hero-strip" class="hero-strip"></section>
         <section id="digest-content" class="digest-grid"></section>
+        
+        <div class="artifacts-row">
+          <section id="player-panel" class="card" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Áudio</p>
+                <h2>Podcast</h2>
+              </div>
+            </div>
+            <audio id="audio-player" controls preload="metadata"></audio>
+          </section>
+
+          <section id="downloads-panel" class="card" hidden>
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Arquivos</p>
+                <h2>Downloads</h2>
+              </div>
+            </div>
+            <div id="download-links" class="download-stack"></div>
+          </section>
+        </div>
       </main>
 
       <aside class="action-panel">
@@ -61,6 +84,19 @@
           </div>
           <div id="job-banner" class="job-banner"></div>
           <div id="job-progress" class="progress-wrap"></div>
+        </section>
+
+        <section class="card">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Memória</p>
+              <a href="/search" class="panel-link"><h2>Busca Vetorial</h2></a>
+            </div>
+          </div>
+          <div class="quick-search-wrap">
+            <input id="quick-search" class="text-input" type="search" placeholder="Petrobras, Selic, Fed…">
+            <button id="quick-search-btn" class="btn btn-primary" type="button" title="Buscar no histórico">🔍</button>
+          </div>
         </section>
 
         <section class="card">
@@ -85,26 +121,6 @@
           </div>
           <div id="market-radar" class="market-stack"></div>
         </section>
-
-        <section id="player-panel" class="card" hidden>
-          <div class="panel-head">
-            <div>
-              <p class="eyebrow">Áudio</p>
-              <h2>Podcast</h2>
-            </div>
-          </div>
-          <audio id="audio-player" controls preload="metadata"></audio>
-        </section>
-
-        <section id="downloads-panel" class="card" hidden>
-          <div class="panel-head">
-            <div>
-              <p class="eyebrow">Arquivos</p>
-              <h2>Downloads</h2>
-            </div>
-          </div>
-          <div id="download-links" class="download-stack"></div>
-        </section>
       </aside>
     </div>
 
@@ -112,5 +128,6 @@
       window.__HERMES_STATE__ = {{ state_payload | tojson }};
     </script>
     <script src="/static/dashboard.js" defer></script>
+    <script src="/static/search.js" defer></script>
   </body>
 </html>

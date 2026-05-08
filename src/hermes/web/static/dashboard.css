@@ -57,8 +57,8 @@ audio {
   grid-template-areas:
     "topbar topbar topbar"
     "calendar content actions";
-  gap: 22px;
-  padding: 22px;
+  gap: 18px;
+  padding: 18px;
 }
 
 .topbar,
@@ -97,6 +97,15 @@ audio {
   color: #fff7ef;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.panel-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.panel-link:hover h2 {
+  color: var(--amber);
 }
 
 .topbar h1,
@@ -163,6 +172,7 @@ audio {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
 }
 
 .content-panel {
@@ -170,6 +180,7 @@ audio {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  height: 100%;
 }
 
 .action-panel {
@@ -177,8 +188,21 @@ audio {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
 }
 
+.calendar-panel,
+.content-panel,
+.action-panel {
+  height: 100%;
+}
+ 
+.calendar-panel > *:last-child,
+.content-panel > *:last-child,
+.action-panel > *:last-child {
+  flex-grow: 1;
+}
+ 
 .card,
 .calendar-panel,
 .hero-card,
@@ -326,20 +350,42 @@ audio {
 }
 
 .hero-card {
+  position: relative;
   background:
     linear-gradient(135deg, rgba(255, 252, 247, 0.88), rgba(242, 236, 224, 0.74));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 40px;
+}
+
+.hero-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .hero-summary {
-  max-width: 62ch;
-  margin: 12px 0 0;
-  font-size: 1.02rem;
+  max-width: 70ch;
+  margin: 16px auto 0;
+  font-size: 1.08rem;
   line-height: 1.7;
   color: var(--text-soft);
 }
 
+.hero-card .status-badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
 .hero-metrics {
-  margin-top: 18px;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -387,12 +433,27 @@ audio {
 
 .digest-grid {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.prose-card {
+  grid-column: span 1;
+}
+
+.key-points-card {
+  grid-column: span 1;
+}
+
+.topics-wrap,
+.empty-card {
+  grid-column: span 2;
 }
 
 .prose-card,
 .topics-wrap,
-.empty-card {
+.empty-card,
+.key-points-card {
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -429,6 +490,17 @@ audio {
   gap: 12px;
   color: var(--text-soft);
   line-height: 1.65;
+}
+
+.artifacts-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.artifacts-row .card {
+  height: 100%;
 }
 
 .topic-grid {
@@ -798,4 +870,42 @@ audio {
   .topbar {
     gap: 18px;
   }
+}
+
+/* Quick search card (sidebar) */
+.quick-search-wrap {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quick-search-wrap .text-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-search-wrap .btn-ghost {
+  width: auto;
+  margin-top: 0;
+  padding: 10px 14px;
+  flex-shrink: 0;
+}
+
+/* Brand mark as anchor (search page back link) */
+a.brand-mark {
+  text-decoration: none;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #17304b, #2e5a49);
+  color: #fff7ef;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  font-size: inherit;
+}
+
+a.brand-mark:hover {
+  opacity: 0.88;
 }

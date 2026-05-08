@@ -208,7 +208,6 @@ function renderDigest() {
         <h3>Sem digest disponível</h3>
         <p>${entry.status === "failed" ? "A última tentativa falhou. Você pode regenerar esta edição." : "Ainda não existe conteúdo consolidado para esta data."}</p>
       </article>
-      ${renderHistory(entry)}
     `;
     return;
   }
@@ -234,7 +233,7 @@ function renderDigest() {
   const sections = [];
 
   sections.push(`
-    <article class="card prose-card">
+    <article class="card prose-card" style="${!keyPoints ? 'grid-column: span 2' : ''}">
       <div class="section-head">
         <p class="eyebrow">Panorama</p>
         <h3>Resumo executivo</h3>
@@ -246,7 +245,7 @@ function renderDigest() {
 
   if (keyPoints) {
     sections.push(`
-      <article class="card">
+      <article class="card key-points-card">
         <div class="section-head">
           <p class="eyebrow">Ação</p>
           <h3>Leituras prioritárias</h3>
@@ -268,35 +267,9 @@ function renderDigest() {
     `);
   }
 
-  sections.push(renderHistory(entry));
   container.innerHTML = sections.join("");
 }
 
-function renderHistory(entry) {
-  const history = entry?.runHistory || [];
-  if (!history.length) {
-    return "";
-  }
-  return `
-    <article class="card">
-      <div class="section-head">
-        <p class="eyebrow">Rastro</p>
-        <h3>Histórico de execução</h3>
-      </div>
-      <div class="timeline">
-        ${history.map((item) => `
-          <div class="timeline-row">
-            <span class="status-badge ${statusVariant(item.status)}">${esc(item.statusLabel)}</span>
-            <div>
-              <strong>${esc(item.checkpointLabel)}</strong>
-              <small>${esc(item.startedAtLabel || "-")}</small>
-            </div>
-          </div>
-        `).join("")}
-      </div>
-    </article>
-  `;
-}
 
 function renderMarket() {
   const container = $("market-radar");
@@ -580,6 +553,17 @@ document.addEventListener("DOMContentLoaded", () => {
   $("date-picker").addEventListener("change", (event) => {
     if (event.target.value) {
       selectDate(event.target.value, true).catch((error) => window.alert(error.message));
+    }
+  });
+
+  $("quick-search-btn").addEventListener("click", () => {
+    const q = ($("quick-search").value || "").trim();
+    if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
+  });
+  $("quick-search").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const q = (e.target.value || "").trim();
+      if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
     }
   });
 
