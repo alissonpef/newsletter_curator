@@ -68,3 +68,33 @@ class StateRepositoryPort(ABC):
     @abstractmethod
     def save_digest(self, date_ref: str, digest: dict):
         pass
+
+
+class VectorStorePort(ABC):
+    @abstractmethod
+    def index_newsletter(
+        self, date_ref: str, sender: str, subject: str, content: str
+    ) -> None:
+        pass
+
+    @abstractmethod
+    def index_digest(self, date_ref: str, summary_data: Dict[str, Any]) -> None:
+        pass
+
+    @abstractmethod
+    def search(
+        self,
+        query: str,
+        n_results: int = 20,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        pass
+
+    @abstractmethod
+    def get_topic_frequency(self, topic: str, days: int = 30) -> List[Dict[str, Any]]:
+        pass
+
+    @abstractmethod
+    def get_stats(self) -> Dict[str, Any]:
+        pass
