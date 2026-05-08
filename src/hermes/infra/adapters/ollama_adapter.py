@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 import requests
 
 from hermes.core.digest_document import (
-    build_fallback_summary,
     parse_summary_markdown,
     summary_to_plain_text,
 )
@@ -69,38 +68,29 @@ Conteúdo limpo das newsletters:
 
     def generate_summary(self, newsletters: List[Dict[str, str]]) -> Dict[str, Any]:
         source_packets = build_source_packets(newsletters)
-        fallback = build_fallback_summary(source_packets)
-
         if not source_packets:
-            return fallback
+            raise ValueError("No content found to summarize.")
 
         prompt_payload = render_prompt_payload(source_packets)
         prompt = self._build_prompt(prompt_payload)
 
-        try:
-            response = requests.post(
-                f"{self.base_url}/api/generate",
-                json={
-                    "model": self.model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.2,
-                        "top_p": 0.85,
-                        "num_ctx": 12288,
-                    },
+        response = requests.post(
+            f"{self.base_url}/api/generate",
+            json={
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.2,
+                    "top_p": 0.85,
+                    "num_ctx": 12288,
                 },
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            markdown = response.json().get("response", "")
-            summary_data = parse_summary_markdown(markdown)
-        except requests.exceptions.RequestException as exc:
-            print(f"Ollama error: {exc}. Using fallback summary.")
-            summary_data = fallback
-        except Exception as exc:
-            print(f"Summary parsing error: {exc}. Using fallback summary.")
-            summary_data = fallback
+            },
+            timeout=self.timeout,
+        )
+        response.raise_for_status()
+        markdown = response.json().get("response", "")
+        summary_data = parse_summary_markdown(markdown)
 
         if not summary_data.get("plainText"):
             summary_data["plainText"] = summary_to_plain_text(summary_data)
@@ -112,20 +102,5 @@ Conteúdo limpo das newsletters:
             summary_data["paragraphCount"] = sum(
                 len(packet.get("highlights", [])) for packet in source_packets
             )
-
-        if not summary_data.get("topics"):
-            summary_data["topics"] = fallback.get("topics", [])
-        if not summary_data.get("keyPoints"):
-            summary_data["keyPoints"] = fallback.get("keyPoints", [])
-        if not summary_data.get("thesis"):
-            summary_data["thesis"] = fallback.get("thesis", "")
-        if not summary_data.get("executiveSummary"):
-            summary_data["executiveSummary"] = fallback.get("executiveSummary", "")
-        if not summary_data.get("closing"):
-            summary_data["closing"] = fallback.get("closing", "")
-        if not summary_data.get("plainText"):
-            summary_data["plainText"] = fallback.get("plainText", "")
-        if not summary_data.get("ttsScript"):
-            summary_data["ttsScript"] = fallback.get("ttsScript", "")
 
         return summary_data
