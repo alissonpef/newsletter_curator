@@ -16,7 +16,7 @@
   <h3 align="center">Hermes Newsletter Curator (v3)</h3>
 
   <p align="center">
-    Um pipeline minimalista e eficiente para curadoria de newsletters financeiras com IA.
+    Um pipeline editorial premium para curadoria de newsletters financeiras com busca semântica.
     <br />
     <a href="https://github.com/alissonpef/Newsletter-Curator"><strong>Explorar código »</strong></a>
     <br />
@@ -54,23 +54,23 @@
 
 ## 📋 Sobre o Projeto
 
-O **Hermes v3** é a versão reconstruída do curador de newsletters focado no "básico bem feito". O sistema atua como um editor humano: lê seus e-mails, sintetiza um único texto contínuo e gera um PDF limpo e um Podcast agradável de ouvir.
+O **Hermes v3** é a evolução definitiva do curador de newsletters. O sistema atua como um editor humano de alta performance: lê seus e-mails, sintetiza um "Resumo Executivo" coeso e gerencia todo o seu histórico através de uma base de conhecimento vetorial.
 
 ### Funcionalidades Principais:
-- **Ingestão IMAP:** Monitoramento e extração limpa das newsletters.
-- **Síntese de Passe Único (LLM):** Uso do Ollama para ler as notícias e redigir um "Resumo Executivo" coeso, sem repetições.
-- **PDF Minimalista:** Relatórios simplificados gerados com **Typst** contendo o Radar de Mercado e o resumo.
-- **Podcast TTS:** Conversão do resumo em áudio para audição diária.
-- **Dashboard Web:** Interface limpa para visualizar, baixar e reproduzir as sínteses.
+- **Síntese Editorial (LLM):** Uso do Ollama para redigir textos contínuos e fluidos, eliminando a fragmentação de notícias repetidas.
+- **Busca Vetorial Semântica:** Integração com **ChromaDB** para pesquisar conceitos e temas em todo o histórico de newsletters (ex: "impacto da Petrobras no IPCA").
+- **Interface Premium (Editorial Look):** Dashboard web com estética de revista de luxo, centralização inteligente e design responsivo (18px grid).
+- **Podcast & PDF:** Geração automatizada de áudio TTS e relatórios PDF minimalistas para consumo em qualquer lugar.
+- **Pipeline Automatizado:** Scripts robustos para processamento diário e gerenciamento do servidor.
 
 ---
 
 ## 🚀 Como Começar
 
 ### Pré-requisitos
-- **Python 3.10+**
-- **Ollama** (com modelo `qwen2.5:7b` ou equivalente instalado localmente)
-- **Typst** (instalado no sistema para compilação de PDF)
+- **Python 3.11+**
+- **Ollama** (necessário para síntese e embeddings vetoriais)
+- **ChromaDB** (instalado automaticamente via dependências)
 
 ### Instalação
 
@@ -78,29 +78,44 @@ O **Hermes v3** é a versão reconstruída do curador de newsletters focado no "
    ```sh
    git clone https://github.com/alissonpef/Newsletter-Curator.git
    ```
-2. Instale as dependências:
+2. Instale as dependências e prepare o ambiente:
    ```sh
-   pip install -r requirements.txt
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install .
    ```
+
 3. Configure o arquivo `.env`:
    ```env
    IMAP_HOST=imap.gmail.com
    IMAP_USERNAME=seu_email@gmail.com
    IMAP_PASSWORD=sua_senha_app
    OLLAMA_CHAT_MODEL=qwen2.5:7b
+   OLLAMA_EMBED_MODEL=mxbai-embed-large
    ```
 
 ---
 
 ## 🛠️ Uso
 
-*(Consulte o PRD para detalhes da arquitetura em reconstrução)*
+O Hermes v3 agora conta com scripts de automação que garantem que todos os serviços (como Ollama) estejam prontos antes da execução.
 
-### Rodar o Dashboard Web
+### 1. Dashboard Web & Memória (Recomendado)
+Para iniciar a interface editorial e usar a **Busca Vetorial**:
 ```sh
-python -m hermes.main serve-web
+./hermes_web.sh
 ```
 Acesse em: `http://127.0.0.1:8787`
+
+### 2. Rodar o Pipeline de Geração (Terminal)
+Para processar e sintetizar as newsletters do dia:
+```sh
+# Hoje
+./hermes_run.sh
+
+# Data específica
+./hermes_run.sh 25/04/2026
+```
 
 ---
 
