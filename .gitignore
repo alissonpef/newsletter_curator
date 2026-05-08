@@ -1,8 +1,11 @@
 __pycache__/
-.pytest_cache/
+dist/
+build/
 .venv/
+.pytest_cache/
 .ollama/
 data/
 .env
 *.log
-models/
+.vscode/
+

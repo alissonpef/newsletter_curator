@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hermes-newsletter-curator"
-version = "0.3.0"
-description = "Dashboard editorial para consolidar newsletters financeiras em PDF, áudio e Kindle"
+version = "0.4.0"
+description = "Dashboard editorial para consolidar newsletters financeiras com busca vetorial (ChromaDB), PDF, áudio e Kindle"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -19,6 +19,8 @@ dependencies = [
   "requests>=2.33.0",
   "uvicorn>=0.35.0",
   "yfinance>=0.2.65",
+  "chromadb>=0.6.0",
+  "ollama>=0.4.0",
 ]
 
 [project.optional-dependencies]
