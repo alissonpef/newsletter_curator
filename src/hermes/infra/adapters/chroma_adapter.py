@@ -59,9 +59,8 @@ def _make_digest_id(date_ref: str, section: str, index: int = 0) -> str:
     return f"{date_ref}:{section}:{index}"
 
 
-def _truncate(text: str, max_chars: int = 4000) -> str:
+def _truncate(text: str, max_chars: int = 1500) -> str:
     return text[:max_chars].strip() if text else ""
-
 
 class ChromaAdapter(VectorStorePort):
     NEWSLETTER_COLLECTION = "newsletters"
@@ -70,7 +69,7 @@ class ChromaAdapter(VectorStorePort):
     def __init__(
         self,
         client: chromadb.ClientAPI,
-        embedding_model: str = "nomic-embed-text",
+        embedding_model: str = "mxbai-embed-large",
         ollama_url: str = "http://localhost:11434",
     ):
         self.embedding_model = embedding_model
@@ -105,7 +104,7 @@ class ChromaAdapter(VectorStorePort):
         content: str,
     ) -> None:
         doc_id = _make_newsletter_id(date_ref, sender, subject)
-        document = _truncate(content, 4000)
+        document = _truncate(content, 1500)
         if not document:
             return
 

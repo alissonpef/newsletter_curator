@@ -60,7 +60,7 @@ def build_container() -> HermesContainer:
     kindle_address = os.getenv("KINDLE_ADDRESS", "")
 
     chroma_dir = os.getenv("CHROMA_PERSIST_DIR", "data/chroma")
-    chroma_model = os.getenv("CHROMA_EMBEDDING_MODEL", "nomic-embed-text")
+    chroma_model = os.getenv("CHROMA_EMBEDDING_MODEL", "mxbai-embed-large")
 
     web_host = os.getenv("WEB_HOST", "127.0.0.1")
     web_port = int(os.getenv("WEB_PORT", "8787"))
