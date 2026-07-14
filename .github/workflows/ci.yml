@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "mian" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "mian" ]
 
 jobs:
   lint-check:
