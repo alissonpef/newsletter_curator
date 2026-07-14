@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hermes-newsletter-curator"
+name = "newsletter_curator"
 version = "0.4.0"
 description = "Dashboard editorial para consolidar newsletters financeiras com busca vetorial (ChromaDB), PDF, áudio e Kindle"
 readme = "README.md"

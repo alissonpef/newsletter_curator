@@ -12,7 +12,7 @@
 <!-- LOGOTIPO DO PROJETO -->
 <br />
 <div align="center">
-  <a href="https://github.com/alissonpef/Newsletter-Curator">
+  <a href="https://github.com/alissonpef/newsletter_curator">
     <img src="assets/newsletter-curator.png" alt="Logo" width="120" height="120">
   </a>
 
@@ -21,12 +21,12 @@
   <p align="center">
     Um pipeline editorial premium para curadoria de newsletters financeiras com busca semântica.
     <br />
-    <a href="https://github.com/alissonpef/Newsletter-Curator"><strong>Explore a documentação »</strong></a>
+    <a href="https://github.com/alissonpef/newsletter_curator"><strong>Explore a documentação »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/alissonpef/Newsletter-Curator/issues">Reportar Bug</a>
+    <a href="https://github.com/alissonpef/newsletter_curator/issues">Reportar Bug</a>
     &middot;
-    <a href="https://github.com/alissonpef/Newsletter-Curator/issues">Solicitar Recurso</a>
+    <a href="https://github.com/alissonpef/newsletter_curator/issues">Solicitar Recurso</a>
   </p>
 </div>
 
@@ -103,7 +103,7 @@ Este projeto exige Python 3.11+ e a ferramenta `uv` para o gerenciamento ágil d
 
 1. Clone o repositório:
    ```sh
-   git clone https://github.com/alissonpef/Newsletter-Curator.git
+   git clone https://github.com/alissonpef/newsletter_curator.git
    ```
 2. Instale as dependências e configure o ambiente com `uv`:
    ```sh
@@ -164,8 +164,8 @@ As contribuições tornam a comunidade de software livre um local maravilhoso pa
 
 ### Principais contribuidores:
 
-<a href="https://github.com/alissonpef/Newsletter-Curator/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=alissonpef/Newsletter-Curator" alt="imagem contrib.rocks" />
+<a href="https://github.com/alissonpef/newsletter_curator/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alissonpef/newsletter_curator" alt="imagem contrib.rocks" />
 </a>
 
 <p align="right">(<a href="#readme-top">voltar ao topo</a>)</p>
@@ -184,7 +184,7 @@ Distribuído sob a Licença MIT. Veja o arquivo `LICENSE` para mais informaçõe
 
 Alisson Pereira Ferreira - [alissonpef@gmail.com](mailto:alissonpef@gmail.com) - [LinkedIn](https://www.linkedin.com/in/alisson-pereira-ferreira/)
 
-Link do Projeto: [https://github.com/alissonpef/Newsletter-Curator](https://github.com/alissonpef/Newsletter-Curator)
+Link do Projeto: [https://github.com/alissonpef/newsletter_curator](https://github.com/alissonpef/newsletter_curator)
 
 <p align="right">(<a href="#readme-top">voltar ao topo</a>)</p>
 
@@ -193,16 +193,16 @@ Link do Projeto: [https://github.com/alissonpef/Newsletter-Curator](https://gith
 Made with ❤️ by **Alisson Pereira**.
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/alissonpef/Newsletter-Curator.svg?style=for-the-badge
-[contributors-url]: https://github.com/alissonpef/Newsletter-Curator/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/alissonpef/Newsletter-Curator.svg?style=for-the-badge
-[forks-url]: https://github.com/alissonpef/Newsletter-Curator/network/members
-[stars-shield]: https://img.shields.io/github/stars/alissonpef/Newsletter-Curator.svg?style=for-the-badge
-[stars-url]: https://github.com/alissonpef/Newsletter-Curator/stargazers
-[issues-shield]: https://img.shields.io/github/issues/alissonpef/Newsletter-Curator.svg?style=for-the-badge
-[issues-url]: https://github.com/alissonpef/Newsletter-Curator/issues
-[license-shield]: https://img.shields.io/github/license/alissonpef/Newsletter-Curator.svg?style=for-the-badge
-[license-url]: https://github.com/alissonpef/Newsletter-Curator/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/alissonpef/newsletter_curator.svg?style=for-the-badge
+[contributors-url]: https://github.com/alissonpef/newsletter_curator/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/alissonpef/newsletter_curator.svg?style=for-the-badge
+[forks-url]: https://github.com/alissonpef/newsletter_curator/network/members
+[stars-shield]: https://img.shields.io/github/stars/alissonpef/newsletter_curator.svg?style=for-the-badge
+[stars-url]: https://github.com/alissonpef/newsletter_curator/stargazers
+[issues-shield]: https://img.shields.io/github/issues/alissonpef/newsletter_curator.svg?style=for-the-badge
+[issues-url]: https://github.com/alissonpef/newsletter_curator/issues
+[license-shield]: https://img.shields.io/github/license/alissonpef/newsletter_curator.svg?style=for-the-badge
+[license-url]: https://github.com/alissonpef/newsletter_curator/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/alisson-pereira-ferreira/
 
