@@ -3,7 +3,6 @@ from __future__ import annotations
 import smtplib
 from email.message import EmailMessage
 from pathlib import Path
-from typing import Optional
 
 from hermes.core.interfaces import KindlePort
 
@@ -28,22 +27,21 @@ class SmtpKindleAdapter(KindlePort):
     def is_configured(self) -> bool:
         return bool(self.host and self.port and self.username and self.password)
 
-    def _normalize_kindle_email(self, kindle_email: Optional[str]) -> str:
+    def _normalize_kindle_email(self, kindle_email: str | None) -> str:
         candidate = (kindle_email or self.default_kindle_email).strip()
         if "@" not in candidate:
             raise ValueError("Informe um e-mail válido do Kindle.")
         return candidate
 
-    def _build_message(
-        self, date_ref: str, kindle_email: str, pdf_path: Path
-    ) -> EmailMessage:
+    def _build_message(self, date_ref: str, kindle_email: str, pdf_path: Path) -> EmailMessage:
         message = EmailMessage()
         message["From"] = self.username
         message["To"] = kindle_email
         message["Subject"] = f"convert - Hermes {date_ref}"
         message.set_content(
             "Envio automático do digest Hermes.\n"
-            "Se este remetente ainda não estiver liberado na Amazon, autorize-o na sua conta Kindle."
+            "Se este remetente ainda não estiver liberado na Amazon, "
+            "autorize-o na sua conta Kindle."
         )
         message.add_attachment(
             pdf_path.read_bytes(),
@@ -53,9 +51,7 @@ class SmtpKindleAdapter(KindlePort):
         )
         return message
 
-    def send_pdf(
-        self, date_ref: str, pdf_path: Path, kindle_email: Optional[str] = None
-    ) -> str:
+    def send_pdf(self, date_ref: str, pdf_path: Path, kindle_email: str | None = None) -> str:
         if not self.is_configured():
             raise RuntimeError("O envio para Kindle não está configurado no servidor.")
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import chromadb
 from chromadb.utils.embedding_functions import OllamaEmbeddingFunction
@@ -18,7 +18,7 @@ class SearchResult:
         self,
         doc_id: str,
         document: str,
-        metadata: Dict[str, Any],
+        metadata: dict[str, Any],
         score: float,
     ):
         self.doc_id = doc_id
@@ -26,9 +26,9 @@ class SearchResult:
         self.metadata = metadata
         self.score = score
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         date_ref = self.metadata.get("date_ref", "")
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "id": self.doc_id,
             "score": round(self.score, 4),
             "date_ref": date_ref,
@@ -61,6 +61,7 @@ def _make_digest_id(date_ref: str, section: str, index: int = 0) -> str:
 
 def _truncate(text: str, max_chars: int = 1500) -> str:
     return text[:max_chars].strip() if text else ""
+
 
 class ChromaAdapter(VectorStorePort):
     NEWSLETTER_COLLECTION = "newsletters"
@@ -124,12 +125,12 @@ class ChromaAdapter(VectorStorePort):
         )
         logger.debug("Indexed newsletter %s [%s · %s]", doc_id, date_ref, sender)
 
-    def index_digest(self, date_ref: str, summary_data: Dict[str, Any]) -> None:
-        ids: List[str] = []
-        documents: List[str] = []
-        metadatas: List[Dict[str, Any]] = []
+    def index_digest(self, date_ref: str, summary_data: dict[str, Any]) -> None:
+        ids: list[str] = []
+        documents: list[str] = []
+        metadatas: list[dict[str, Any]] = []
 
-        base_meta: Dict[str, Any] = {
+        base_meta: dict[str, Any] = {
             "date_ref": date_ref,
             "date_int": int(date_ref.replace("-", "")),
             "source_type": "digest",
@@ -140,9 +141,7 @@ class ChromaAdapter(VectorStorePort):
         if thesis:
             ids.append(_make_digest_id(date_ref, "thesis"))
             documents.append(_truncate(thesis))
-            metadatas.append(
-                {**base_meta, "section": "thesis", "topic_title": "", "signal": ""}
-            )
+            metadatas.append({**base_meta, "section": "thesis", "topic_title": "", "signal": ""})
 
         exec_summary = summary_data.get("executiveSummary", "").strip()
         if exec_summary:
@@ -197,9 +196,7 @@ class ChromaAdapter(VectorStorePort):
         if closing:
             ids.append(_make_digest_id(date_ref, "closing"))
             documents.append(_truncate(closing))
-            metadatas.append(
-                {**base_meta, "section": "closing", "topic_title": "", "signal": ""}
-            )
+            metadatas.append({**base_meta, "section": "closing", "topic_title": "", "signal": ""})
 
         if not ids:
             logger.warning("No content to index for digest %s", date_ref)
@@ -216,9 +213,9 @@ class ChromaAdapter(VectorStorePort):
         self,
         query: str,
         n_results: int = 20,
-        date_from: Optional[str] = None,
-        date_to: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> list[dict[str, Any]]:
         where = self._build_date_filter(date_from, date_to)
 
         newsletter_results = self._query_collection(
@@ -232,7 +229,7 @@ class ChromaAdapter(VectorStorePort):
         merged.sort(key=lambda r: r.score, reverse=True)
 
         seen: set = set()
-        unique: List[SearchResult] = []
+        unique: list[SearchResult] = []
         for r in merged:
             if r.doc_id not in seen:
                 seen.add(r.doc_id)
@@ -244,35 +241,29 @@ class ChromaAdapter(VectorStorePort):
         self,
         query: str,
         n_results: int = 10,
-        date_from: Optional[str] = None,
-        date_to: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> list[dict[str, Any]]:
         where = self._build_date_filter(date_from, date_to)
-        results = self._query_collection(
-            self._newsletters, query, n_results=n_results, where=where
-        )
+        results = self._query_collection(self._newsletters, query, n_results=n_results, where=where)
         return [r.to_dict() for r in results]
 
     def search_digests(
         self,
         query: str,
         n_results: int = 10,
-        date_from: Optional[str] = None,
-        date_to: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> list[dict[str, Any]]:
         where = self._build_date_filter(date_from, date_to)
-        results = self._query_collection(
-            self._digests, query, n_results=n_results, where=where
-        )
+        results = self._query_collection(self._digests, query, n_results=n_results, where=where)
         return [r.to_dict() for r in results]
 
-    def get_topic_frequency(self, topic: str, days: int = 30) -> List[Dict[str, Any]]:
+    def get_topic_frequency(self, topic: str, days: int = 30) -> list[dict[str, Any]]:
         date_from = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
         where = self._build_date_filter(date_from=date_from)
         try:
-            digest_results = self._query_collection(
-                self._digests, topic, n_results=50, where=where
-            )
+            digest_results = self._query_collection(self._digests, topic, n_results=50, where=where)
             newsletter_results = self._query_collection(
                 self._newsletters, topic, n_results=30, where=where
             )
@@ -282,7 +273,7 @@ class ChromaAdapter(VectorStorePort):
 
         all_results = digest_results + newsletter_results
 
-        by_date: Dict[str, Dict[str, Any]] = {}
+        by_date: dict[str, dict[str, Any]] = {}
         for r in all_results:
             d = r.metadata.get("date_ref", "")
             if not d:
@@ -299,15 +290,13 @@ class ChromaAdapter(VectorStorePort):
                 by_date[d]["top_score"] = r.score
                 by_date[d]["top_snippet"] = r.document[:200].strip()
 
-        sorted_dates = sorted(
-            by_date.values(), key=lambda x: x["date_ref"], reverse=True
-        )
+        sorted_dates = sorted(by_date.values(), key=lambda x: x["date_ref"], reverse=True)
         for item in sorted_dates:
             item.pop("top_score", None)
 
         return sorted_dates
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         return {
             "newsletters_indexed": self._newsletters.count(),
             "digests_indexed": self._digests.count(),
@@ -319,15 +308,15 @@ class ChromaAdapter(VectorStorePort):
         collection,
         query: str,
         n_results: int,
-        where: Optional[Dict] = None,
-    ) -> List[SearchResult]:
+        where: dict | None = None,
+    ) -> list[SearchResult]:
         try:
             count = collection.count()
             if count == 0:
                 return []
 
             actual_n = min(n_results, count)
-            kwargs: Dict[str, Any] = {
+            kwargs: dict[str, Any] = {
                 "query_texts": [query],
                 "n_results": actual_n,
                 "include": ["documents", "metadatas", "distances"],
@@ -340,13 +329,13 @@ class ChromaAdapter(VectorStorePort):
             logger.warning("ChromaDB query failed on '%s': %s", collection.name, exc)
             return []
 
-        results: List[SearchResult] = []
+        results: list[SearchResult] = []
         ids = response.get("ids", [[]])[0]
         docs = response.get("documents", [[]])[0]
         metas = response.get("metadatas", [[]])[0]
         distances = response.get("distances", [[]])[0]
 
-        for doc_id, document, metadata, distance in zip(ids, docs, metas, distances):
+        for doc_id, document, metadata, distance in zip(ids, docs, metas, distances, strict=True):
             score = max(0.0, 1.0 - (distance / 2.0))
             results.append(
                 SearchResult(
@@ -361,9 +350,9 @@ class ChromaAdapter(VectorStorePort):
 
     @staticmethod
     def _build_date_filter(
-        date_from: Optional[str] = None,
-        date_to: Optional[str] = None,
-    ) -> Optional[Dict]:
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> dict | None:
         def _to_int(date_str: str) -> int:
             return int(date_str.replace("-", ""))
 

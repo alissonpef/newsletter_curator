@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 import chromadb
 
@@ -32,7 +32,7 @@ class ChromaStateRepository(StateRepositoryPort):
             self._digests.count(),
         )
 
-    def get_job(self, date_ref: str) -> Optional[Dict[str, Any]]:
+    def get_job(self, date_ref: str) -> dict[str, Any] | None:
         result = self._jobs.get(ids=[date_ref], include=["documents"])
         if result["ids"]:
             try:
@@ -41,7 +41,7 @@ class ChromaStateRepository(StateRepositoryPort):
                 return None
         return None
 
-    def save_job(self, date_ref: str, job: Dict[str, Any]) -> None:
+    def save_job(self, date_ref: str, job: dict[str, Any]) -> None:
         self._jobs.upsert(
             ids=[date_ref],
             embeddings=_DUMMY_EMBEDDING,
@@ -49,7 +49,7 @@ class ChromaStateRepository(StateRepositoryPort):
             metadatas=[{"date_ref": date_ref}],
         )
 
-    def get_digest(self, date_ref: str) -> Optional[Dict[str, Any]]:
+    def get_digest(self, date_ref: str) -> dict[str, Any] | None:
         result = self._digests.get(ids=[date_ref], include=["documents"])
         if result["ids"]:
             try:
@@ -58,7 +58,7 @@ class ChromaStateRepository(StateRepositoryPort):
                 return None
         return None
 
-    def save_digest(self, date_ref: str, digest: Dict[str, Any]) -> None:
+    def save_digest(self, date_ref: str, digest: dict[str, Any]) -> None:
         self._digests.upsert(
             ids=[date_ref],
             embeddings=_DUMMY_EMBEDDING,

@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from fpdf import FPDF
 
 from hermes.core.digest_document import normalize_heading, normalize_spaces
 from hermes.core.interfaces import PdfPort
-
 
 FONT_DIR_CANDIDATES = (
     Path("/usr/share/fonts/truetype/dejavu"),
@@ -31,13 +30,9 @@ class FpdfAdapter(PdfPort):
 
     def _resolve_font_dir(self) -> Path:
         for candidate in FONT_DIR_CANDIDATES:
-            if (candidate / "DejaVuSans.ttf").exists() and (
-                candidate / "DejaVuSerif.ttf"
-            ).exists():
+            if (candidate / "DejaVuSans.ttf").exists() and (candidate / "DejaVuSerif.ttf").exists():
                 return candidate
-        raise FileNotFoundError(
-            "DejaVu fonts not found in the expected Linux font directories."
-        )
+        raise FileNotFoundError("DejaVu fonts not found in the expected Linux font directories.")
 
     def _build_pdf(self) -> HermesPdf:
         pdf = HermesPdf(format="A4")
@@ -165,13 +160,11 @@ class FpdfAdapter(PdfPort):
 
     def _topic_card_metrics(
         self, pdf: HermesPdf, width: float, title: str, summary: str, impact: str
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         title_width = width - 48
         body_width = width - 12
 
-        title_lines = self._count_wrapped_lines(
-            pdf, title, title_width, "HermesSerif", "B", 13
-        )
+        title_lines = self._count_wrapped_lines(pdf, title, title_width, "HermesSerif", "B", 13)
         summary_lines = (
             self._count_wrapped_lines(pdf, summary, body_width, "HermesSans", "", 9.5)
             if summary
@@ -243,15 +236,11 @@ class FpdfAdapter(PdfPort):
 
         pdf.set_y(start_y + box_height + 6)
 
-    def _market_cards(
-        self, pdf: HermesPdf, market_data: Dict[str, Dict[str, str]]
-    ) -> None:
+    def _market_cards(self, pdf: HermesPdf, market_data: dict[str, dict[str, str]]) -> None:
         self._section_label(pdf, "Radar de Mercado")
         cards = list(market_data.items())
         if not cards:
-            self._paragraph(
-                pdf, "Sem dados de mercado disponíveis nesta execução.", font_size=10
-            )
+            self._paragraph(pdf, "Sem dados de mercado disponíveis nesta execução.", font_size=10)
             return
 
         page_width = pdf.w - pdf.l_margin - pdf.r_margin
@@ -291,7 +280,7 @@ class FpdfAdapter(PdfPort):
 
             pdf.set_y(row_y + 22)
 
-    def _bullet_list(self, pdf: HermesPdf, title: str, items: List[str]) -> None:
+    def _bullet_list(self, pdf: HermesPdf, title: str, items: list[str]) -> None:
         filtered = [self._safe_text(item) for item in items if self._safe_text(item)]
         if not filtered:
             return
@@ -307,7 +296,7 @@ class FpdfAdapter(PdfPort):
             pdf.multi_cell(0, 6, item)
             pdf.ln(1)
 
-    def _topic_cards(self, pdf: HermesPdf, topics: List[Dict[str, str]]) -> None:
+    def _topic_cards(self, pdf: HermesPdf, topics: list[dict[str, str]]) -> None:
         cleaned_topics = [topic for topic in topics if topic]
         if not cleaned_topics:
             return
@@ -381,16 +370,12 @@ class FpdfAdapter(PdfPort):
             final_y = max(pdf.get_y(), start_y + metrics["height"])
             pdf.set_y(final_y + 4)
 
-    def render_pdf(
-        self, date_ref: str, digest: Dict[str, Any], market_data: Dict[str, Any]
-    ) -> str:
+    def render_pdf(self, date_ref: str, digest: dict[str, Any], market_data: dict[str, Any]) -> str:
         pdf = self._build_pdf()
 
         summary_data = digest.get("summaryData") or {}
         thesis = summary_data.get("thesis") or digest.get("summary") or ""
-        executive_summary = (
-            summary_data.get("executiveSummary") or digest.get("summary") or ""
-        )
+        executive_summary = summary_data.get("executiveSummary") or digest.get("summary") or ""
         key_points = summary_data.get("keyPoints") or []
         topics = summary_data.get("topics") or []
         closing = summary_data.get("closing") or ""

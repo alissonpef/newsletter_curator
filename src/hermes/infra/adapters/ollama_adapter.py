@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -22,51 +22,47 @@ class OllamaAdapter(LlmPort):
         self.timeout = timeout
 
     def _build_prompt(self, prompt_payload: str) -> str:
-        return f"""Você é o editor-chefe de um briefing executivo matinal para um leitor profissional do mercado.
+        return (
+            "Você é o editor-chefe de um briefing executivo matinal para um "
+            "leitor profissional do mercado.\n\n"
+            "Objetivo:\n"
+            "- consolidar newsletters financeiras em um resumo elegante e sem ruído;\n"
+            "- remover duplicidade factual e textual;\n"
+            "- escrever em português do Brasil com tom sóbrio, direto e inteligente;\n"
+            "- jamais reproduzir links, rodapés, banners, chamadas promocionais, botões, "
+            "créditos de e-mail ou instruções de assinatura.\n\n"
+            "Regras absolutas:\n"
+            "- Não use caixa alta em títulos.\n"
+            "- Não deixe linhas em branco extras.\n"
+            "- Não repita o mesmo fato com frases diferentes.\n"
+            "- Quando o mesmo tema aparecer em mais de uma fonte, consolide em um único tópico.\n"
+            "- Cada fonte deve virar no máximo um tema principal; não separe um único e-mail "
+            "em vários tópicos.\n"
+            "- Se uma fonte tiver subtítulos ou desdobramentos, use isso como contexto do mesmo "
+            "tópico, não como um novo tópico.\n"
+            "- Evite adjetivação vazia e frases longas.\n"
+            "- Se houver informação insuficiente para um tópico, "
+            "omita o tópico em vez de inventar.\n\n"
+            "Saída obrigatória, exatamente em Markdown, sem texto antes ou depois:\n\n"
+            "# Tese do dia\n"
+            "<um parágrafo curto com a leitura central do dia>\n\n"
+            "# Panorama executivo\n"
+            "<um parágrafo curto explicando o quadro geral>\n\n"
+            "# Leituras prioritárias\n"
+            "- <3 a 5 bullets objetivos, sem repetir temas>\n\n"
+            "# Temas em foco\n"
+            "## <título em Title Case>\n"
+            "<um parágrafo curto>\n"
+            "Impacto: <uma frase objetiva>\n"
+            "Sinal: <Alta, Média ou Baixa>\n\n"
+            "## <repita para 3 a 5 temas realmente relevantes, com no máximo um tema por fonte>\n\n"
+            "# Fechamento\n"
+            "<um parágrafo curto com o que merece monitoramento a seguir>\n\n"
+            "Conteúdo limpo das newsletters:\n"
+            f"{prompt_payload}\n"
+        )
 
-Objetivo:
-- consolidar newsletters financeiras em um resumo elegante e sem ruído;
-- remover duplicidade factual e textual;
-- escrever em português do Brasil com tom sóbrio, direto e inteligente;
-- jamais reproduzir links, rodapés, banners, chamadas promocionais, botões, créditos de e-mail ou instruções de assinatura.
-
-Regras absolutas:
-- Não use caixa alta em títulos.
-- Não deixe linhas em branco extras.
-- Não repita o mesmo fato com frases diferentes.
-- Quando o mesmo tema aparecer em mais de uma fonte, consolide em um único tópico.
-- Cada fonte deve virar no máximo um tema principal; não separe um único e-mail em vários tópicos.
-- Se uma fonte tiver subtítulos ou desdobramentos, use isso como contexto do mesmo tópico, não como um novo tópico.
-- Evite adjetivação vazia e frases longas.
-- Se houver informação insuficiente para um tópico, omita o tópico em vez de inventar.
-
-Saída obrigatória, exatamente em Markdown, sem texto antes ou depois:
-
-# Tese do dia
-<um parágrafo curto com a leitura central do dia>
-
-# Panorama executivo
-<um parágrafo curto explicando o quadro geral>
-
-# Leituras prioritárias
-- <3 a 5 bullets objetivos, sem repetir temas>
-
-# Temas em foco
-## <título em Title Case>
-<um parágrafo curto>
-Impacto: <uma frase objetiva>
-Sinal: <Alta, Média ou Baixa>
-
-## <repita para 3 a 5 temas realmente relevantes, com no máximo um tema por fonte>
-
-# Fechamento
-<um parágrafo curto com o que merece monitoramento a seguir>
-
-Conteúdo limpo das newsletters:
-{prompt_payload}
-"""
-
-    def generate_summary(self, newsletters: List[Dict[str, str]]) -> Dict[str, Any]:
+    def generate_summary(self, newsletters: list[dict[str, str]]) -> dict[str, Any]:
         source_packets = build_source_packets(newsletters)
         if not source_packets:
             raise ValueError("No content found to summarize.")

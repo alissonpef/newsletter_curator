@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from hermes.core.interfaces import KindlePort, StateRepositoryPort
 
@@ -11,7 +10,7 @@ class SendToKindleUseCase:
         self.kindle_port = kindle_port
         self.state_repo = state_repo
 
-    def execute(self, date_ref: str, kindle_email: Optional[str] = None) -> dict:
+    def execute(self, date_ref: str, kindle_email: str | None = None) -> dict:
         if not self.kindle_port.is_configured():
             raise RuntimeError(
                 "Configure SMTP e o remetente autorizado antes de usar o envio para Kindle."

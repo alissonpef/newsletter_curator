@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import Optional
 
 import chromadb
 
@@ -26,7 +25,7 @@ logger = logging.getLogger(__name__)
 class HermesContainer:
     process_daily_uc: ProcessDailyUseCase = field(default=None)
     send_to_kindle_uc: SendToKindleUseCase = field(default=None)
-    search_uc: Optional[SearchKnowledgeUseCase] = field(default=None)
+    search_uc: SearchKnowledgeUseCase | None = field(default=None)
 
     state_repo: ChromaStateRepository = field(default=None)
     kindle_adapter: SmtpKindleAdapter = field(default=None)

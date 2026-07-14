@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Iterable
 from difflib import SequenceMatcher
-from typing import Any, Dict, Iterable, List
+from typing import Any
 
 from hermes.core.digest_document import normalize_heading, normalize_spaces
-
 
 NOISE_PATTERNS = [
     r"^https?://\S+$",
@@ -122,7 +122,10 @@ CTA_MARKERS = (
 )
 
 DATE_LINE_PATTERNS = (
-    r"^(?:segunda|terca|quarta|quinta|sexta|sabado|domingo)(?:-feira)?[, ]+\d{1,2}\s+de\s+[a-z]+(?:\s+de\s+\d{4})?\s*$",
+    (
+        r"^(?:segunda|terca|quarta|quinta|sexta|sabado|domingo)(?:-feira)?"
+        r"[, ]+\d{1,2}\s+de\s+[a-z]+(?:\s+de\s+\d{4})?\s*$"
+    ),
     r"^\d{1,2}\s+de\s+[a-z]+(?:\s+de\s+\d{4})?\s*$",
     r"^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\s*$",
 )
@@ -150,11 +153,7 @@ def _looks_like_noise(line: str) -> bool:
     if len(compact_ascii) < 3:
         return True
 
-    if (
-        compact_ascii.count("@") >= 1
-        and "." in compact_ascii
-        and len(compact_ascii.split()) <= 4
-    ):
+    if compact_ascii.count("@") >= 1 and "." in compact_ascii and len(compact_ascii.split()) <= 4:
         return True
 
     if re.fullmatch(r"[\W_]+", compact):
@@ -172,11 +171,7 @@ def _looks_like_noise(line: str) -> bool:
     if sum(1 for ch in compact if ch.isdigit()) > len(compact) * 0.45:
         return True
 
-    for pattern in NOISE_PATTERNS:
-        if re.match(pattern, compact_ascii, re.IGNORECASE):
-            return True
-
-    return False
+    return any(re.match(pattern, compact_ascii, re.IGNORECASE) for pattern in NOISE_PATTERNS)
 
 
 def _looks_like_call_to_action(line: str) -> bool:
@@ -219,8 +214,8 @@ def _is_probably_heading(line: str) -> bool:
     return (uppercase_ratio > 0.55 or word_count <= 10) and not sentence_like
 
 
-def _merge_broken_lines(lines: Iterable[str]) -> List[str]:
-    merged: List[str] = []
+def _merge_broken_lines(lines: Iterable[str]) -> list[str]:
+    merged: list[str] = []
 
     for raw_line in lines:
         line = normalize_spaces(raw_line)
@@ -241,11 +236,7 @@ def _merge_broken_lines(lines: Iterable[str]) -> List[str]:
         current_starts_lower = line[:1].islower()
         current_is_short_tail = len(line) < 48 and not _is_probably_heading(line)
 
-        if (
-            previous_is_heading
-            and not current_starts_lower
-            and not current_is_short_tail
-        ):
+        if previous_is_heading and not current_starts_lower and not current_is_short_tail:
             merged.append(line)
             continue
 
@@ -257,7 +248,7 @@ def _merge_broken_lines(lines: Iterable[str]) -> List[str]:
     return merged
 
 
-def _is_duplicate(candidate: str, seen: List[str]) -> bool:
+def _is_duplicate(candidate: str, seen: list[str]) -> bool:
     normalized_candidate = _normalize_for_comparison(candidate)
     if not normalized_candidate or len(normalized_candidate) < 20:
         return True
@@ -285,7 +276,7 @@ def _is_duplicate(candidate: str, seen: List[str]) -> bool:
     return False
 
 
-def clean_newsletter_text(text: str) -> List[str]:
+def clean_newsletter_text(text: str) -> list[str]:
     text = text or ""
     text = text.replace("\r", "")
     text = re.sub(r"https?://\S+", "", text)
@@ -305,8 +296,8 @@ def clean_newsletter_text(text: str) -> List[str]:
     filtered_lines = [line for line in raw_lines if not _looks_like_noise(line)]
     merged_lines = _merge_broken_lines(filtered_lines)
 
-    seen: List[str] = []
-    unique_lines: List[str] = []
+    seen: list[str] = []
+    unique_lines: list[str] = []
     for line in merged_lines:
         cleaned = normalize_spaces(line)
         if len(cleaned) < 18 and not _is_probably_heading(cleaned):
@@ -323,8 +314,8 @@ def _text_key(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", _strip_accents(normalize_spaces(text)).lower())
 
 
-def _heading_candidates(lines: Iterable[str]) -> List[str]:
-    candidates: List[str] = []
+def _heading_candidates(lines: Iterable[str]) -> list[str]:
+    candidates: list[str] = []
     for line in lines:
         if not _is_probably_heading(line):
             continue
@@ -333,7 +324,7 @@ def _heading_candidates(lines: Iterable[str]) -> List[str]:
             continue
         candidates.append(candidate)
 
-    unique_candidates: List[str] = []
+    unique_candidates: list[str] = []
     seen = set()
     for candidate in candidates:
         key = _text_key(candidate)
@@ -345,7 +336,7 @@ def _heading_candidates(lines: Iterable[str]) -> List[str]:
     return unique_candidates
 
 
-def _choose_packet_title(subject: str, cleaned_lines: List[str]) -> str:
+def _choose_packet_title(subject: str, cleaned_lines: list[str]) -> str:
     subject_title = normalize_heading(subject) or "Newsletter"
     subject_key = _text_key(subject_title)
 
@@ -368,9 +359,9 @@ def _choose_packet_title(subject: str, cleaned_lines: List[str]) -> str:
     return subject_title
 
 
-def _build_packet_highlights(title: str, cleaned_lines: List[str]) -> List[str]:
+def _build_packet_highlights(title: str, cleaned_lines: list[str]) -> list[str]:
     title_key = _text_key(title)
-    highlights: List[str] = []
+    highlights: list[str] = []
 
     for line in cleaned_lines:
         candidate = normalize_spaces(line)
@@ -386,9 +377,9 @@ def _build_packet_highlights(title: str, cleaned_lines: List[str]) -> List[str]:
 
 
 def build_source_packets(
-    newsletters: List[Dict[str, str]], max_packets: int = 12
-) -> List[Dict[str, Any]]:
-    packets: List[Dict[str, Any]] = []
+    newsletters: list[dict[str, str]], max_packets: int = 12
+) -> list[dict[str, Any]]:
+    packets: list[dict[str, Any]] = []
 
     for newsletter in newsletters:
         subject = normalize_spaces(newsletter.get("subject", "").strip())
@@ -403,11 +394,7 @@ def build_source_packets(
             highlights = cleaned_lines[:2] or [title]
 
         summary = " ".join(highlights[:2]).strip()
-        impact_raw = (
-            highlights[2]
-            if len(highlights) > 2
-            else "Ponto de atenção para investidores."
-        )
+        impact_raw = highlights[2] if len(highlights) > 2 else "Ponto de atenção para investidores."
         impact = impact_raw.lstrip(" ,;:-.")
 
         packets.append(
@@ -445,10 +432,8 @@ def build_source_packets(
     return packets
 
 
-def render_prompt_payload(
-    source_packets: List[Dict[str, Any]], max_chars: int = 18000
-) -> str:
-    rendered_packets: List[str] = []
+def render_prompt_payload(source_packets: list[dict[str, Any]], max_chars: int = 18000) -> str:
+    rendered_packets: list[str] = []
     current_chars = 0
 
     for index, packet in enumerate(source_packets, start=1):

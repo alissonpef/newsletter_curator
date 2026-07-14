@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from typing import Any, Dict, Iterable, List
-
+from collections.abc import Iterable
+from typing import Any
 
 SECTION_KEYS = {
     "tese do dia": "thesis",
@@ -53,9 +53,7 @@ def normalize_heading(text: str) -> str:
     alpha_chars = [ch for ch in candidate if ch.isalpha()]
     uppercase_ratio = 0.0
     if alpha_chars:
-        uppercase_ratio = sum(1 for ch in alpha_chars if ch.isupper()) / len(
-            alpha_chars
-        )
+        uppercase_ratio = sum(1 for ch in alpha_chars if ch.isupper()) / len(alpha_chars)
 
     if uppercase_ratio < 0.55:
         return candidate
@@ -104,7 +102,7 @@ def normalize_heading(text: str) -> str:
     return title
 
 
-def empty_summary() -> Dict[str, Any]:
+def empty_summary() -> dict[str, Any]:
     return {
         "thesis": "",
         "executiveSummary": "",
@@ -119,7 +117,7 @@ def empty_summary() -> Dict[str, Any]:
     }
 
 
-def _topic_to_plain_text(topic: Dict[str, Any]) -> str:
+def _topic_to_plain_text(topic: dict[str, Any]) -> str:
     summary = normalize_spaces(topic.get("summary", ""))
     impact = normalize_spaces(topic.get("impact", ""))
     title = normalize_heading(topic.get("title", "")) or "Tema"
@@ -129,8 +127,8 @@ def _topic_to_plain_text(topic: Dict[str, Any]) -> str:
     return " ".join(part for part in parts if part).strip()
 
 
-def summary_to_plain_text(summary_data: Dict[str, Any]) -> str:
-    parts: List[str] = []
+def summary_to_plain_text(summary_data: dict[str, Any]) -> str:
+    parts: list[str] = []
 
     thesis = normalize_spaces(summary_data.get("thesis", ""))
     executive_summary = normalize_spaces(summary_data.get("executiveSummary", ""))
@@ -158,8 +156,8 @@ def summary_to_plain_text(summary_data: Dict[str, Any]) -> str:
     return normalize_spaces("\n\n".join(part for part in parts if part))
 
 
-def _dedupe_text_items(items: Iterable[str]) -> List[str]:
-    unique: List[str] = []
+def _dedupe_text_items(items: Iterable[str]) -> list[str]:
+    unique: list[str] = []
     seen = set()
     for item in items:
         candidate = normalize_spaces(item)
@@ -190,7 +188,7 @@ def clean_markdown_output(markdown: str) -> str:
     return markdown.strip()
 
 
-def _append_section_line(store: Dict[str, Any], key: str | None, line: str) -> None:
+def _append_section_line(store: dict[str, Any], key: str | None, line: str) -> None:
     if not key:
         return
 
@@ -208,7 +206,7 @@ def _append_section_line(store: Dict[str, Any], key: str | None, line: str) -> N
     store[key] = normalize_spaces(f"{existing}\n\n{line}" if existing else line)
 
 
-def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
+def parse_summary_markdown(markdown: str) -> dict[str, Any]:
     summary_data = empty_summary()
     markdown = clean_markdown_output(markdown)
     summary_data["rawMarkdown"] = markdown
@@ -217,7 +215,7 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
         return summary_data
 
     current_section: str | None = None
-    current_topic: Dict[str, Any] | None = None
+    current_topic: dict[str, Any] | None = None
 
     for raw_line in markdown.splitlines():
         line = raw_line.strip()
@@ -226,12 +224,8 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
 
         if line.startswith("## "):
             if current_topic:
-                current_topic["summary"] = normalize_spaces(
-                    current_topic.get("summary", "")
-                )
-                current_topic["impact"] = normalize_spaces(
-                    current_topic.get("impact", "")
-                )
+                current_topic["summary"] = normalize_spaces(current_topic.get("summary", ""))
+                current_topic["impact"] = normalize_spaces(current_topic.get("impact", ""))
                 summary_data["topics"].append(current_topic)
             current_topic = {
                 "title": normalize_heading(line[3:]),
@@ -244,12 +238,8 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
 
         if line.startswith("# "):
             if current_topic:
-                current_topic["summary"] = normalize_spaces(
-                    current_topic.get("summary", "")
-                )
-                current_topic["impact"] = normalize_spaces(
-                    current_topic.get("impact", "")
-                )
+                current_topic["summary"] = normalize_spaces(current_topic.get("summary", ""))
+                current_topic["impact"] = normalize_spaces(current_topic.get("impact", ""))
                 summary_data["topics"].append(current_topic)
                 current_topic = None
 
@@ -265,9 +255,7 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
                 current_topic["signal"] = normalize_signal(line.split(":", 1)[1])
             else:
                 joined = (
-                    f"{current_topic['summary']}\n\n{line}"
-                    if current_topic["summary"]
-                    else line
+                    f"{current_topic['summary']}\n\n{line}" if current_topic["summary"] else line
                 )
                 current_topic["summary"] = joined
             continue
@@ -280,9 +268,7 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
         summary_data["topics"].append(current_topic)
 
     summary_data["thesis"] = normalize_spaces(summary_data["thesis"])
-    summary_data["executiveSummary"] = normalize_spaces(
-        summary_data["executiveSummary"]
-    )
+    summary_data["executiveSummary"] = normalize_spaces(summary_data["executiveSummary"])
     summary_data["closing"] = normalize_spaces(summary_data["closing"])
     summary_data["keyPoints"] = _dedupe_text_items(summary_data["keyPoints"])
     summary_data["topics"] = [
@@ -293,8 +279,7 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
             "signal": normalize_signal(topic.get("signal", "")),
         }
         for topic in summary_data["topics"]
-        if normalize_spaces(topic.get("title", ""))
-        or normalize_spaces(topic.get("summary", ""))
+        if normalize_spaces(topic.get("title", "")) or normalize_spaces(topic.get("summary", ""))
     ]
     unique_topics = []
     seen_topics = set()
@@ -312,10 +297,6 @@ def parse_summary_markdown(markdown: str) -> Dict[str, Any]:
     summary_data["plainText"] = summary_to_plain_text(summary_data)
     summary_data["ttsScript"] = summary_data["plainText"]
     summary_data["paragraphCount"] = len(
-        [
-            part
-            for part in re.split(r"\n\n+", summary_data["plainText"])
-            if normalize_spaces(part)
-        ]
+        [part for part in re.split(r"\n\n+", summary_data["plainText"]) if normalize_spaces(part)]
     )
     return summary_data

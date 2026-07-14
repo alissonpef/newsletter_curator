@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 
 from hermes.core.interfaces import VectorStorePort
 
@@ -14,9 +14,9 @@ class SearchKnowledgeUseCase:
         self,
         query: str,
         n_results: int = 20,
-        date_from: Optional[str] = None,
-        date_to: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> dict[str, Any]:
         query = (query or "").strip()
         if not query:
             return {
@@ -49,7 +49,7 @@ class SearchKnowledgeUseCase:
         self,
         topic: str,
         days: int = 30,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         topic = (topic or "").strip()
         if not topic:
             return {"query": topic, "days": days, "total_occurrences": 0, "by_date": []}
@@ -67,7 +67,7 @@ class SearchKnowledgeUseCase:
             "by_date": occurrences,
         }
 
-    def get_vector_stats(self) -> Dict[str, Any]:
+    def get_vector_stats(self) -> dict[str, Any]:
         return self.vector_store.get_stats()
 
     _PT_WEEKDAYS = [

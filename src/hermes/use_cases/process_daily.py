@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import os
 from datetime import datetime
-from typing import Dict, List
 
 from hermes.core.interfaces import (
     AudioPort,
@@ -35,7 +34,7 @@ class ProcessDailyUseCase:
         self.market_data_port = market_data_port
         self.vector_store: VectorStorePort | None = vector_store
 
-    def _new_digest(self, date_ref: str) -> Dict:
+    def _new_digest(self, date_ref: str) -> dict:
         return {
             "dateRef": date_ref,
             "dateLabel": date_ref,
@@ -59,9 +58,9 @@ class ProcessDailyUseCase:
         progress_pct: int,
         current_step_key: str,
         current_step_label: str,
-        warnings: List[str] | None = None,
+        warnings: list[str] | None = None,
         error: str | None = None,
-    ) -> Dict:
+    ) -> dict:
         job = {
             "dateRef": date_ref,
             "status": status,
@@ -82,11 +81,7 @@ class ProcessDailyUseCase:
 
     async def execute(self, date_ref: str, force: bool = False):
         existing_job = self.state_repo.get_job(date_ref)
-        if (
-            existing_job
-            and existing_job.get("status") in {"running", "queued"}
-            and not force
-        ):
+        if existing_job and existing_job.get("status") in {"running", "queued"} and not force:
             return
 
         digest = self.state_repo.get_digest(date_ref) or self._new_digest(date_ref)
@@ -161,13 +156,9 @@ class ProcessDailyUseCase:
                 current_step_key="synthesis",
                 current_step_label="Consolidando a síntese",
             )
-            print(
-                f"[{date_ref}] Consolidando síntese com Ollama (isso pode demorar)..."
-            )
+            print(f"[{date_ref}] Consolidando síntese com Ollama (isso pode demorar)...")
 
-            summary_data = await self._run_blocking(
-                self.llm_port.generate_summary, emails
-            )
+            summary_data = await self._run_blocking(self.llm_port.generate_summary, emails)
             digest["summaryData"] = summary_data
             digest["summary"] = summary_data.get("plainText", "")
             digest["hasContent"] = bool(digest["summary"])
@@ -270,9 +261,7 @@ class ProcessDailyUseCase:
                     print(f"[{date_ref}] AVISO: {warn}")
         except Exception as exc:
             error_message = str(exc)
-            digest.setdefault("warnings", []).append(
-                "A última tentativa terminou com erro."
-            )
+            digest.setdefault("warnings", []).append("A última tentativa terminou com erro.")
             self.state_repo.save_digest(date_ref, digest)
             self._save_job(
                 date_ref,

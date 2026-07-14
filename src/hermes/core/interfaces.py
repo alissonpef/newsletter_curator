@@ -1,25 +1,23 @@
-from pathlib import Path
-from typing import List, Dict, Any, Optional
 from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Any
 
 
 class EmailPort(ABC):
     @abstractmethod
-    def fetch_emails(self, date_ref: str) -> List[Dict[str, str]]:
+    def fetch_emails(self, date_ref: str) -> list[dict[str, str]]:
         pass
 
 
 class LlmPort(ABC):
     @abstractmethod
-    def generate_summary(self, newsletters: List[Dict[str, str]]) -> Dict[str, Any]:
+    def generate_summary(self, newsletters: list[dict[str, str]]) -> dict[str, Any]:
         pass
 
 
 class PdfPort(ABC):
     @abstractmethod
-    def render_pdf(
-        self, date_ref: str, digest: Dict[str, Any], market_data: Dict[str, Any]
-    ) -> str:
+    def render_pdf(self, date_ref: str, digest: dict[str, Any], market_data: dict[str, Any]) -> str:
         pass
 
 
@@ -39,16 +37,14 @@ class KindlePort(ABC):
         self,
         date_ref: str,
         pdf_path: Path,
-        kindle_email: Optional[str] = None,
+        kindle_email: str | None = None,
     ) -> str:
         pass
 
 
 class MarketDataPort(ABC):
     @abstractmethod
-    def fetch_market_data(
-        self, date_ref: Optional[str] = None
-    ) -> Dict[str, Dict[str, str]]:
+    def fetch_market_data(self, date_ref: str | None = None) -> dict[str, dict[str, str]]:
         pass
 
 
@@ -72,13 +68,11 @@ class StateRepositoryPort(ABC):
 
 class VectorStorePort(ABC):
     @abstractmethod
-    def index_newsletter(
-        self, date_ref: str, sender: str, subject: str, content: str
-    ) -> None:
+    def index_newsletter(self, date_ref: str, sender: str, subject: str, content: str) -> None:
         pass
 
     @abstractmethod
-    def index_digest(self, date_ref: str, summary_data: Dict[str, Any]) -> None:
+    def index_digest(self, date_ref: str, summary_data: dict[str, Any]) -> None:
         pass
 
     @abstractmethod
@@ -86,15 +80,15 @@ class VectorStorePort(ABC):
         self,
         query: str,
         n_results: int = 20,
-        date_from: Optional[str] = None,
-        date_to: Optional[str] = None,
-    ) -> List[Dict[str, Any]]:
+        date_from: str | None = None,
+        date_to: str | None = None,
+    ) -> list[dict[str, Any]]:
         pass
 
     @abstractmethod
-    def get_topic_frequency(self, topic: str, days: int = 30) -> List[Dict[str, Any]]:
+    def get_topic_frequency(self, topic: str, days: int = 30) -> list[dict[str, Any]]:
         pass
 
     @abstractmethod
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         pass

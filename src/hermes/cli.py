@@ -33,9 +33,7 @@ def main():
                 dt = datetime.strptime(date_str, "%Y-%m-%d")
                 date_ref = dt.strftime("%Y-%m-%d")
         except Exception:
-            print(
-                f"Erro: Formato de data inválido '{date_str}'. Use DD/MM/YY ou YYYY-MM-DD."
-            )
+            print(f"Erro: Formato de data inválido '{date_str}'. Use DD/MM/YY ou YYYY-MM-DD.")
             sys.exit(1)
     else:
         date_ref = datetime.now().strftime("%Y-%m-%d")

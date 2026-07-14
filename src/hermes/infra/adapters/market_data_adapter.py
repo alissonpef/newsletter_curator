@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Dict
 
 import yfinance as yf
 
@@ -42,9 +41,7 @@ class YFinanceMarketDataAdapter(MarketDataPort):
 
         raise ValueError("insufficient market history")
 
-    def fetch_market_data(
-        self, date_ref: str | None = None
-    ) -> Dict[str, Dict[str, str]]:
+    def fetch_market_data(self, date_ref: str | None = None) -> dict[str, dict[str, str]]:
         tickers = {
             "Ibovespa": "^BVSP",
             "S&P 500": "^GSPC",
@@ -54,7 +51,7 @@ class YFinanceMarketDataAdapter(MarketDataPort):
             "Ouro": "GC=F",
         }
 
-        result: Dict[str, Dict[str, str]] = {}
+        result: dict[str, dict[str, str]] = {}
         for name, ticker in tickers.items():
             try:
                 history = self._history_for_date(ticker, date_ref)

@@ -4,7 +4,6 @@ import asyncio
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
@@ -16,7 +15,6 @@ from hermes.core.interfaces import StateRepositoryPort
 from hermes.use_cases.process_daily import ProcessDailyUseCase
 from hermes.use_cases.search_knowledge import SearchKnowledgeUseCase
 from hermes.use_cases.send_to_kindle import SendToKindleUseCase
-
 
 os.makedirs("data/pdf", exist_ok=True)
 os.makedirs("data/audio", exist_ok=True)
@@ -75,7 +73,7 @@ class GenerateRequest(BaseModel):
 
 class KindleRequest(BaseModel):
     date_ref: str
-    kindle_email: Optional[str] = None
+    kindle_email: str | None = None
 
 
 def _pt_date_label(day: datetime) -> str:
@@ -93,7 +91,7 @@ def _relative_label(day: datetime, today: datetime) -> str:
     return f"{PT_WEEKDAYS[day.weekday()].capitalize()} · {day.day:02d}/{day.month:02d}"
 
 
-def _decorate_entry(date_ref: str, digest: Optional[dict], today: datetime) -> dict:
+def _decorate_entry(date_ref: str, digest: dict | None, today: datetime) -> dict:
     day = datetime.strptime(date_ref, "%Y-%m-%d")
     base = digest or {
         "dateRef": date_ref,
@@ -125,15 +123,16 @@ def _build_calendar_weeks(entries: list[dict]) -> list[dict]:
 
     weeks = []
     for monday_ref in sorted(week_buckets.keys(), reverse=True):
-        days = sorted(
-            week_buckets[monday_ref], key=lambda item: item["dateRef"], reverse=True
-        )
+        days = sorted(week_buckets[monday_ref], key=lambda item: item["dateRef"], reverse=True)
         monday = datetime.strptime(monday_ref, "%Y-%m-%d")
         sunday = monday + timedelta(days=6)
         weeks.append(
             {
                 "weekRef": monday_ref,
-                "label": f"{monday.day:02d} {PT_MONTHS[monday.month - 1][:3]} - {sunday.day:02d} {PT_MONTHS[sunday.month - 1][:3]}",
+                "label": (
+                    f"{monday.day:02d} {PT_MONTHS[monday.month - 1][:3]} - "
+                    f"{sunday.day:02d} {PT_MONTHS[sunday.month - 1][:3]}"
+                ),
                 "days": days,
             }
         )
@@ -142,9 +141,7 @@ def _build_calendar_weeks(entries: list[dict]) -> list[dict]:
 
 def _build_stats(entries: list[dict]) -> dict:
     ready = sum(1 for entry in entries if entry.get("status") in {"ready", "succeeded"})
-    running = sum(
-        1 for entry in entries if entry.get("status") in {"running", "queued"}
-    )
+    running = sum(1 for entry in entries if entry.get("status") in {"running", "queued"})
     pending = sum(1 for entry in entries if entry.get("status") in {"missing", "idle"})
     return {
         "ready": ready,
@@ -153,7 +150,7 @@ def _build_stats(entries: list[dict]) -> dict:
     }
 
 
-def get_overview_data(days_back: int, selected_date: Optional[str] = None):
+def get_overview_data(days_back: int, selected_date: str | None = None):
     if ServerConfig.state_repo is None:
         raise RuntimeError("State repository not configured")
 
@@ -167,16 +164,12 @@ def get_overview_data(days_back: int, selected_date: Optional[str] = None):
         entries.append(_decorate_entry(date_ref, digest, today))
 
     selected_date = selected_date or today.strftime("%Y-%m-%d")
-    selected_entry = next(
-        (entry for entry in entries if entry["dateRef"] == selected_date), None
-    )
+    selected_entry = next((entry for entry in entries if entry["dateRef"] == selected_date), None)
     if selected_entry is None:
         selected_entry = _decorate_entry(
             selected_date, ServerConfig.state_repo.get_digest(selected_date), today
         )
-    selected_job = (
-        ServerConfig.state_repo.get_job(selected_date) if selected_date else None
-    )
+    selected_job = ServerConfig.state_repo.get_job(selected_date) if selected_date else None
 
     return {
         "daysBack": days_back,
@@ -220,9 +213,7 @@ async def api_day(date_ref: str):
         raise RuntimeError("State repository not configured")
 
     today = datetime.now()
-    entry = _decorate_entry(
-        date_ref, ServerConfig.state_repo.get_digest(date_ref), today
-    )
+    entry = _decorate_entry(date_ref, ServerConfig.state_repo.get_digest(date_ref), today)
     job = ServerConfig.state_repo.get_job(date_ref)
     return {
         "entry": entry,
@@ -240,11 +231,7 @@ async def api_generate(req: GenerateRequest):
         raise RuntimeError("Server not configured")
 
     existing_job = ServerConfig.state_repo.get_job(req.date_ref)
-    if (
-        existing_job
-        and existing_job.get("status") in {"queued", "running"}
-        and not req.force
-    ):
+    if existing_job and existing_job.get("status") in {"queued", "running"} and not req.force:
         entry = _decorate_entry(
             req.date_ref,
             ServerConfig.state_repo.get_digest(req.date_ref),
