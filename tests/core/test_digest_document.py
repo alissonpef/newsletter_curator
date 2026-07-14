@@ -1,26 +1,31 @@
-import pytest
 from hermes.core.digest_document import (
-    normalize_spaces,
-    strip_accents,
+    clean_markdown_output,
     normalize_heading,
     normalize_signal,
-    clean_markdown_output,
+    normalize_spaces,
     parse_summary_markdown,
-    empty_summary
+    strip_accents,
 )
+
 
 def test_normalize_spaces():
     assert normalize_spaces("  hello   world  \n\n\n test ") == "hello world \n\n test"
     assert normalize_spaces("text \r \u00a0 text") == "text text"
 
+
 def test_strip_accents():
     assert strip_accents("olá, você está bem?") == "ola, voce esta bem?"
     assert strip_accents("ÁÉÍÓÚ") == "AEIOU"
 
+
 def test_normalize_heading():
     assert normalize_heading("--- Title: HELLO WORLD ---") == "Title: Hello World"
-    assert normalize_heading("Already Capitalized And Normalized") == "Already Capitalized And Normalized"
+    assert (
+        normalize_heading("Already Capitalized And Normalized")
+        == "Already Capitalized And Normalized"
+    )
     assert normalize_heading("IMPACTO DA SELIC E DO S&P") == "Impacto da Selic e do S&P"
+
 
 def test_normalize_signal():
     assert normalize_signal(" ALta ") == "Alta"
@@ -29,10 +34,12 @@ def test_normalize_signal():
     assert normalize_signal("baixo") == "Baixa"
     assert normalize_signal("desconhecido") == "Média"
 
+
 def test_clean_markdown_output():
     raw = "Some preamble text\n\n# Tese do Dia\nText here"
     assert clean_markdown_output(raw) == "# Tese do Dia\nText here"
-    
+
+
 def test_parse_summary_markdown():
     markdown = """
 # Tese do Dia

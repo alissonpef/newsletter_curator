@@ -22,7 +22,7 @@ def test_execute_valid_query():
     use_case = SearchKnowledgeUseCase(vector_store_mock)
 
     result = use_case.execute(query="stocks", n_results=5)
-    
+
     assert result["total"] == 1
     assert result["query"] == "stocks"
     assert result["results"][0]["date_label"] == "domingo, 1 de outubro"
@@ -50,7 +50,7 @@ def test_get_topic_timeline_valid():
     use_case = SearchKnowledgeUseCase(vector_store_mock)
 
     result = use_case.get_topic_timeline(topic="economy", days=10)
-    
+
     assert result["total_occurrences"] == 5
     assert result["days"] == 10
     assert result["by_date"][0]["date_label"] == "segunda, 2 de outubro"
